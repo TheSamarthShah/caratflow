@@ -1,0 +1,194 @@
+.form-style {
+  height: 100%;
+  min-width: max-content;
+}
+
+.group-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 100%;
+  width: max-content;
+
+  .group-row {
+    display: flex;
+    border: 1px solid var(--theme-border);
+    align-items: flex-start;
+    background-color: var(--theme-base);
+    min-width: 100%;
+    width: max-content;
+    box-sizing: border-box; 
+
+    .equal-group-create {
+      flex: 0 0 calc(50% - (var(--theme-spacing-small-plus)/2)); 
+    }
+    
+    .tabular-grid-tabColumn {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+
+      .group-section {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+
+        .full-width-group-contain {
+          width : 100%;
+        }
+        
+        .group-field {
+          display: flex;
+          align-items: center;
+          padding-right: var(--theme-spacing-small);
+
+          .field-label {
+            height: 100%;
+            align-content: center;
+            line-height: var(--theme-elements-container-height);
+            min-height: var(--theme-elements-container-height);
+            padding-right: var(--theme-spacing-medium);
+            white-space: nowrap;
+            text-align: right;
+            border-right: 1px solid var(--theme-border);
+            background-color: var(--theme-surface-10);
+            font-size: var(--theme-small-font-size);
+
+            .field-required-indicator {
+              color: var(--theme-danger);
+            }
+          }
+
+          .field-label.first-field-label{
+            border-left: 1px solid var(--theme-border);
+          }
+
+          .field-value-full-width {
+            width: 100%;
+            display: flex;
+          }
+          
+          .field-value {
+            /* Applying styles to standard Material wrappers instead of custom acty inputs */
+            ::ng-deep .updatedCell {
+              .mdc-text-field--outlined, 
+              .mdc-checkbox__background, 
+              .mdc-radio__outer-circle {
+                background-color: var(--theme-success-light) !important;
+              }
+            }
+
+            ::ng-deep .validate-column,
+            ::ng-deep .entry-require-column {
+              .mdc-text-field--outlined, 
+              .mdc-checkbox__background, 
+              .mdc-radio__outer-circle {
+                background-color: var(--theme-danger-light) !important;
+              }
+            }
+
+            padding: var(--theme-spacing-small) 0;
+            padding-left: var(--theme-spacing-small);
+            white-space: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+
+            .field-value-readonly {
+              line-height: var(--theme-elements-container-height);
+              min-height: var(--theme-elements-container-height);
+
+              &.textarea-readonly {
+                display: block;
+                min-height: auto;
+                white-space: pre-wrap;
+              }
+            }
+          }
+        }
+      }
+    }
+
+   .input-row-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;  
+      gap: var(--theme-spacing-small-plus);             
+      width: 100%;
+      
+      /* Target the Angular Material mat-form-field internal padding adjustment */
+      mat-form-field {
+        margin-bottom: -1.25em; /* Compensate for standard Material padding */
+      }
+
+      .conditionDropdownWrapper {
+        width: var(--theme-samll-input-box-width);
+      }
+    }
+    .component-full-width {
+      width: calc(100% / 2 - ((var(--theme-samll-input-box-width)/2) + var(--theme-spacing-small-plus)));
+      min-width: 250px;
+    }
+  }
+}
+
+.required-field {
+  color: var(--theme-danger);
+  margin-left: var(--theme-spacing-xsmall);
+}
+
+.datePickercontent {
+  display: flex;
+  z-index: 107 !important;
+  position: relative;
+  flex-direction: column;
+  background: var(--theme-interactive-hover);
+  padding: var(--theme-spacing-small);
+  .content-heading {
+    display: flex;
+    justify-content: space-between;
+    .content-title {
+      display: flex;
+      gap: 1rem;
+      padding-bottom: var(--theme-spacing-small);
+    }
+  }
+  .content {
+    display: flex;
+    justify-content: space-between;
+    .child {
+      display: flex;
+      align-items: center;
+      gap: var(--theme-spacing-xsmall);
+      font-size: var(--theme-medium-font-size);
+      
+      .date-input-dropdown {
+        width: 150px;
+        margin-bottom: -1.25em;
+      }
+      .number-input {
+        width: var(--theme-xsamll-input-box-width);
+        margin-bottom: -1.25em;
+      }
+      .child-label {
+        text-wrap-mode: nowrap;
+        margin-right: var(--theme-spacing-small);
+      }
+    }
+  }
+}
+
+.formWrapperClass {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  min-width: max-content;
+}
+
+.sticky-date-picker {
+  width: 100%;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--theme-interactive-hover);
+  z-index: 107; 
+  border-top: 1px solid var(--theme-border);
+}

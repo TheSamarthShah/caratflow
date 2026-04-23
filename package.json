@@ -22,12 +22,17 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/cdk": "^21.2.8",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
     "@angular/forms": "^20.3.0",
+    "@angular/material": "^21.2.8",
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
+    "ngx-cookie-service": "^21.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
