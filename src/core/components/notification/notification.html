@@ -1,0 +1,23 @@
+@for (pos of positions; track pos) {
+  <div class="toast-container" [ngClass]="pos">
+    @for (toast of toasts(); track toast) {
+      @if(toast.position === pos) {
+        <div class="toast" [ngClass]="toast.type">
+          <div class="toast-content">
+            @if(toast.header) {
+              <strong class="toast-summary">{{ toast.header }}</strong>
+            }
+            <span class="toast-message">
+               @if(toast.params) {
+                  {{ toast.message | translate:toast.params }}
+               } @else {
+                  {{ toast.message | translate }}
+                } 
+            </span>
+          </div>
+          <acty-button type="icon" [leftIcon]="'close'" (click)="removeToast(toast)"/>
+        </div>
+      }
+    }
+  </div>
+}

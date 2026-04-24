@@ -1,0 +1,47 @@
+.button-wrapper {
+    display: flex;
+    gap: var(--theme-spacing-small);
+    height: 100%;
+    .visible-buttons, .menu-button-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--theme-spacing-small);
+        padding: var(--theme-spacing-small) 0;
+        .button-item, .menu-button{
+            display: flex;
+            align-items: center;
+            //padding: var(--theme-spacing-small) 0;
+        }
+        .button-item.hidden {
+            display: none;
+        }
+        .separator {
+            width:  var(--theme-spacing-xsmall);
+            background-color: var(--theme-border);
+        }
+    }
+    .menu-button {
+        display: flex;
+        margin: 0.5rem 0 0.5rem 0;
+    }
+    // More icon center visible changes when btn text not there
+    // .menu-button-wrapper {
+    //     ::ng-deep .acty-button {
+    //         .menu-button {
+    //             justify-items: center;
+    //         }
+    //     }
+    //     ::ng-deep .acty-button-left-icon {
+    //         margin: 0;
+    //     }
+    // }
+}
+
+.menu-item-row {
+    display: flex;
+    align-items: center;
+    .drawer-menu-item{
+        display: flex;
+        align-items: center;
+    }
+}

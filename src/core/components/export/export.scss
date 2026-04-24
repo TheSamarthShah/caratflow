@@ -1,0 +1,14 @@
+.exportlayout-container{
+    padding: var(--theme-spacing-small);
+    display: flex; 
+    gap: var(--theme-spacing-small-medium);
+    .fileNameInputContainer{
+        width: var(--theme-form-field-width);
+    }
+    .fileTypedropdownContainer{
+        width: 100px;
+    }
+    .field-required-indicator{
+        color: var(--theme-danger)
+    }
+}

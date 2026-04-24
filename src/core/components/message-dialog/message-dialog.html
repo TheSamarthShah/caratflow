@@ -1,0 +1,37 @@
+<acty-dialog-box
+  #dialog
+  [showClose]="true"
+  [width]="'auto'"
+  [height]="'auto'"
+  [title]="data()?.header??'' |translate"
+  [showTitle]="true"
+>    
+   <div class="dialog-content-wrapper">
+    <div class="message-row">
+      <mat-icon  [ngClass]="data()?.messagePrifixIcon || 'warning'">{{data()?.messagePrifixIcon ??"warning"}}</mat-icon>
+      @if (data()?.messageData?.params) {
+      <span class="message-content">
+        {{ data()?.messageData?.message ?? '' | translate:data()?.messageData?.params }}
+      </span>
+    } @else {
+      <span class="message-content">
+        {{ data()?.messageData?.message ?? '' | translate }}
+      </span>
+    }
+    </div>
+  </div>
+
+  
+  <!-- Footer Buttons -->
+  <div class="footer-buttons" dialog-footer>
+    @for(btn of data()?.buttons; track $index){
+    <acty-button
+      [type]="'filled'"
+      [text]="btn.label"
+      (click)="handleButtonClick(btn)"
+      [severity]="'primary'"
+    >
+    </acty-button>
+    }
+  </div>
+</acty-dialog-box>

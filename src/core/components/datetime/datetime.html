@@ -1,0 +1,255 @@
+<mat-form-field
+  #matInputDate
+  appearance="outline"
+  subscriptSizing="dynamic"
+  [style]="style()"
+  class="datetime-field acty-datetime-field"
+  [class.disabled]="isDisabled()"
+  cdkOverlayOrigin
+  #trigger="cdkOverlayOrigin"
+>
+  <input
+    actySelectOnFocus
+    [matTooltip]="formatDisplay(value)"
+    #inputRef
+    matInput
+    class="calendar-input"
+    [readonly]="readOnly()"
+    [required]="required()"
+    [value]="formatDisplay(value)"
+    (input)="!readOnly() && onTextInput($event)"
+    (change)="onValueChanged($event)"
+    (focus)="!isDisabled() && togglePopup()" 
+    actyShowTooltipIfTruncated
+  />
+  <!-- (blur)="onBlur($event)" -->
+  @if (isDatePickerVisible()) {
+  <acty-button
+    #firstButton
+    matSuffix
+    mat-icon-button
+    class="calendar-Btn"
+    type="icon"
+    leftIcon="calendar_today"
+    (disabled)="isDisabled()"
+    (click)="$event.stopPropagation(); togglePopup()"
+  />
+  }
+</mat-form-field>
+
+<div class="datetime-hint acty-datetime-hint" [style]="style()">
+  @if (hint() && hint()?.message) {
+  <mat-hint [class]="'acty-datetime-' + getHintType()">
+    <div class="hint-container">
+      <div>
+        <mat-icon>{{ getHintIcon() }}</mat-icon>
+      </div>
+      <span
+        [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+        [matTooltipClass]="'acty-tooltip-' + getHintType()"
+        actyShowTooltipIfTruncated
+      >
+        {{ hint()?.message ?? "" | translate : hint()?.params }}
+      </span>
+    </div>
+  </mat-hint>
+  }
+</div>
+@if (required() && !value && !isDisabled()) {
+<mat-error> Date is required </mat-error>
+}
+
+<!-- Popup Template (CDK Overlay will attach this) -->
+ <!--  (overlayOutsideClick)="closePopup()" -->
+<ng-template
+  #popupTemplate
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+  (backdropClick)="closePopup($event)"
+  (detach)="isOpen = false && closePopup()"
+  (overlayKeydown)="onCalendarKeydown($event)"
+>
+  <div #popupElement class="datetime-popup acty-datetime-popup" cdkTrapFocus cdkTrapFocusAutoCapture="true" (click)="onClickInCalender($event)">
+    <!-- Calendar -->
+    <mat-calendar
+      [selected]="selectedDate"
+      [startAt]="selectedDate"
+      [startView]="calendarStartView"
+      (selectedChange)="onCalendarDateChange($event)"
+      (monthSelected)="onMonthSelected($event)"
+      (yearSelected)="onYearSelected($event)"
+      (viewChanged)="onViewChanged($event)"
+      [minDate]="minDate()"
+      [maxDate]="maxDate()"
+      (click)="clickOnCalenderDate($event)"
+    >
+    </mat-calendar>
+
+    <mat-divider></mat-divider>
+
+    <!-- Time selectors -->
+    @if(isHourVisible || isMinuteVisible || isSecondVisible) {
+    <div class="time-selectors acty-time-selectors">
+      <!-- Hour spinner -->
+      @if(isHourVisible) {
+      <div
+        class="spinner-label-group"
+        tabindex="0"
+        #hourSpinner
+        (keydown)="onSpinnerKeydown($event, 'hour')"
+        (focus)="onSpinnerFocus('hour')"
+        (blur)="onSpinnerBlur()"
+        [attr.aria-label]="'Hour: ' + formatTwoDigits(selectedHour)"
+        role="spinbutton"
+        [attr.aria-valuenow]="selectedHour"
+        aria-valuemin="0"
+        aria-valuemax="23"
+      >
+        <acty-button
+          #iconButtons
+          mat-icon-button
+          class="spinner-btn"
+          type="icon"
+          leftIcon="expand_less"
+          [btnClass]="'calendar-icon'"
+          (mousedown)="$event.preventDefault(); startIncrement('hour'); hourSpinner.focus()"
+          (mouseup)="stopIncrement()"
+          (mouseleave)="stopIncrement()"
+          (touchstart)="startIncrement('hour')"
+          (touchend)="stopIncrement()"
+        />
+        <div class="spinner-value spinner-inner">{{ formatTwoDigits(selectedHour) }}</div>
+        <acty-button
+          #iconButtons
+          mat-icon-button
+          class="spinner-btn"
+          type="icon"
+          [btnClass]="'calendar-icon'"
+          leftIcon="expand_more"
+          (mousedown)="$event.preventDefault(); startDecrement('hour'); hourSpinner.focus()"
+          (mouseup)="stopIncrement()"
+          (mouseleave)="stopIncrement()"
+          (touchstart)="startDecrement('hour')"
+          (touchend)="stopIncrement()"
+        />
+      </div>
+      }
+
+      @if(isMinuteVisible || isSecondVisible) {
+        @if(isHourVisible) { <span>:</span> }
+        <!-- Minute spinner -->
+        <div
+          class="spinner-label-group"
+          tabindex="0"
+          #minuteSpinner
+          (keydown)="onSpinnerKeydown($event, 'minute')"
+          (focus)="onSpinnerFocus('minute')"
+          (blur)="onSpinnerBlur()"
+          [attr.aria-label]="'Minute: ' + formatTwoDigits(selectedMinute)"
+          role="spinbutton"
+          [attr.aria-valuenow]="selectedMinute"
+          aria-valuemin="0"
+          aria-valuemax="59"
+        >
+          <acty-button
+            #iconButtons
+            mat-icon-button
+            class="spinner-btn"
+            type="icon"
+            [btnClass]="'calendar-icon'"
+            leftIcon="expand_less"
+            (mousedown)="$event.preventDefault(); startIncrement('minute'); minuteSpinner.focus()"
+            (mouseup)="stopIncrement()"
+            (mouseleave)="stopIncrement()"
+            (touchstart)="startIncrement('minute')"
+            (touchend)="stopIncrement()"
+          />
+          <div class="spinner-value spinner-inner">{{ formatTwoDigits(selectedMinute) }}</div>
+          <acty-button
+            #iconButtons
+            mat-icon-button
+            class="spinner-btn"
+            type="icon"
+            [btnClass]="'calendar-icon'"
+            leftIcon="expand_more"
+            (mousedown)="$event.preventDefault(); startDecrement('minute'); minuteSpinner.focus()"
+            (mouseup)="stopIncrement()"
+            (mouseleave)="stopIncrement()"
+            (touchstart)="startDecrement('minute')"
+            (touchend)="stopIncrement()"
+          />
+        </div>
+
+        @if (isSecondVisible) {
+          @if(isHourVisible || isMinuteVisible) { <span>:</span> }
+          <!-- Second spinner -->
+          <div
+            class="spinner-label-group"
+            tabindex="0"
+            #secondSpinner
+            (keydown)="onSpinnerKeydown($event, 'second')"
+            (focus)="onSpinnerFocus('second')"
+            (blur)="onSpinnerBlur()"
+            [attr.aria-label]="'Second: ' + formatTwoDigits(selectedSecond)"
+            role="spinbutton"
+            [attr.aria-valuenow]="selectedSecond"
+            aria-valuemin="0"
+            aria-valuemax="59"
+          >
+            <acty-button
+              #iconButtons
+              mat-icon-button
+              class="spinner-btn"
+              type="icon"
+              [btnClass]="'calendar-icon'"
+              leftIcon="expand_less"
+              (mousedown)="$event.preventDefault(); startIncrement('second'); secondSpinner.focus()"
+              (mouseup)="stopIncrement()"
+              (mouseleave)="stopIncrement()"
+              (touchstart)="startIncrement('second')"
+              (touchend)="stopIncrement()"
+            />
+            <div class="spinner-value spinner-inner">{{ formatTwoDigits(selectedSecond) }}</div>
+            <acty-button
+              #iconButtons
+              mat-icon-button
+              class="spinner-btn"
+              type="icon"
+              [btnClass]="'calendar-icon'"
+              leftIcon="expand_more"
+              (mousedown)="$event.preventDefault(); startDecrement('second'); secondSpinner.focus()"
+              (mouseup)="stopIncrement()"
+              (mouseleave)="stopIncrement()"
+              (touchstart)="startDecrement('second')"
+              (touchend)="stopIncrement()"
+            />
+          </div>
+        }
+      }
+    </div>
+    }
+
+    <mat-divider></mat-divider>
+
+    <div class="popup-actions">
+      <acty-button
+        mat-stroked-button
+        type="outlined"
+        [text]="'MENU.Today' | translate"
+        severity="primary"
+        (click)="setToday()"
+      />
+
+      <acty-button
+        mat-stroked-button
+        type="outlined"
+        [text]="'MENU.Clear' | translate"
+        severity="primary"
+        (click)="clear()"
+      />
+    </div>
+  </div>
+</ng-template>

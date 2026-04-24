@@ -1,0 +1,125 @@
+@use "@angular/material" as mat;
+
+.mainDiv {
+  border: 1px solid var(--theme-readonly-text-color);
+  padding: var(--theme-spacing-xlarge);
+
+  .buttonDiv {
+    display: flex;
+    gap: var(--theme-spacing-small-medium);
+  }
+
+  @include mat.divider-overrides(
+    (
+      width: 2px,
+    )
+  );
+
+  .file-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--theme-spacing-small) 0;
+      width: 100%;
+
+      // add separator line
+      border-bottom: 1px solid var(--theme-surface-100);
+
+      &:last-child {
+        border-bottom: none; // no line after last item
+      }
+
+      .file-row {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .file-info {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: var(--theme-spacing-small-medium); // space between icon and text
+
+        .file-icon {
+          width: var(--theme-height-width-large);
+          height: var(--theme-height-width-large);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: var(--theme-surface-100); // light gray background
+          border-radius: 6px;
+          font-size: var(--theme-xlarge-font-size);
+          color: var( --theme-inverse);
+        }
+
+        .file-name {
+          font-size: var(--theme-xlarge-font-size);
+          cursor: pointer;
+          color: var(--theme-primary);
+        }
+
+        .desc-row{
+          display: flex; 
+          color: var(--theme-readonly-text-color);
+        }
+
+        .file-size{
+          font-size: var(--theme-small-font-size);
+        }
+
+        .file-name:hover{
+          text-decoration: underline;
+        }
+      }
+
+      .right-buttons{
+        display: flex; 
+        flex-wrap: wrap; 
+        align-content: center;
+      }
+
+      .deleteFileIcon {
+        color: var(--theme-danger);
+        margin-left: var(--theme-spacing-small-medium);
+        cursor: pointer;
+      }
+
+      .downloadFileIcon{
+        cursor: pointer;
+      }
+
+      @include mat.badge-overrides(
+        (
+          container-offset: -12px 5px,
+        )
+      );
+    }
+  }
+
+  .dragdropblock {
+    padding: 0 var(--theme-spacing-small-medium);
+    margin-top: var(--theme-spacing-small-medium);
+    border: 2px dashed var(--theme-surface);
+    text-align: left;
+    overflow: auto;
+    // max-height: 268px;
+
+    .no-files{
+      padding: var(--theme-spacing-large);
+    }
+  }
+
+  .divider{
+    margin-top: var(--theme-spacing-small-medium)
+  }
+}

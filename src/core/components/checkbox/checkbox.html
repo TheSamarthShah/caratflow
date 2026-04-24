@@ -1,0 +1,54 @@
+<div class="checkbox-container acty-checkbox-container">
+  <!-- Parent -->
+  @if (!hasChildren || showParent()) {
+  <mat-checkbox
+    [matTooltip]="toolTip()"
+    class="acty-checkbox checkbox"
+    [checked]="value()"
+    [style]="style()"
+    [indeterminate]="indeterminate()"
+    [labelPosition]="align()"
+    (change)="onParentCheckboxChange($event.checked)"
+    [class.disabled]="isDisabled()"
+    [disabled]="isDisabled()"
+  >
+    {{ label() | translate }}
+  </mat-checkbox>
+  }
+
+  <!-- Children -->
+  @if (hasChildren) {
+  <ng-container>
+    @for (child of children(); track $index) {
+    <mat-checkbox
+      [matTooltip]="toolTip()"
+      class="acty-checkbox checkbox"
+      [checked]="child.checked || false"
+      (change)="onChildCheckboxChange(child, $event.checked)"
+      [class.disabled]="isDisabled()"
+      [disabled]="isDisabled()"
+    >
+      {{ child.caption | translate }}
+    </mat-checkbox>
+    }
+  </ng-container>
+  }
+</div>
+<div class="checkbox-hint acty-checkbox-hint" [style]="style()">
+    @if (hint() && hint()?.message) {
+    <mat-hint [class]="'acty-checkbox-' + getHintType()" [style]="style()">
+      <div class="hint-container">
+        <div>
+          <mat-icon>{{ getHintIcon() }}</mat-icon>
+        </div>
+        <span
+          [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+          [matTooltipClass]="'acty-tooltip-' + getHintType()"
+          actyShowTooltipIfTruncated
+        >
+          {{ hint()?.message ?? "" | translate : hint()?.params }}
+        </span>
+      </div>
+    </mat-hint>
+    }
+  </div>

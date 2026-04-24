@@ -1,0 +1,48 @@
+@if(displayFlgInp()){
+<acty-dialog-box #RefScreen [title]="'CORE.REFERENCESCREEN.REFERENCESETTING.InitialSearchTitle'" [showTitle]="true" [showIcon]="false" [showClose]="true"
+    [showFooterButton]="false" [width]="'340px'" [height]="'210px'" [isDraggable]="true" [backgroundAccess]="false"
+    (dialogClosed)="onCloseDialog()">
+    <div class="acty-dialog-body">
+        <div [formGroup]="ReferencesKbns">
+            <div style="margin-left: 14px;">
+                <label>{{ 'CORE.REFERENCESCREEN.REFERENCESETTING.InitialSearchLabel' | translate}}</label><br>
+
+                <acty-radio-button
+                    [formControlName]="'initialsearchkbn'"
+                    [name]="'initialsearchkbn'"
+                    [children]="[
+                        { caption: 'CORE.REFERENCESCREEN.REFERENCESETTING.RadioOptionYes', code: 0, checked: ReferencesKbns.get('initialsearchkbn')?.value === 0 },
+                        { caption: 'CORE.REFERENCESCREEN.REFERENCESETTING.RadioOptionNo', code: 1, checked: ReferencesKbns.get('initialsearchkbn')?.value === 1 }
+                    ]">
+                </acty-radio-button>
+
+                 <label>{{ 'CORE.REFERENCESCREEN.REFERENCESETTING.Initialconditionkbn' | translate }}</label><br>
+                <acty-radio-button
+                    [formControlName]="'initialconditionkbn'"
+                    [name]="'initialconditionkbn'"
+                    [children]="[
+                        { caption: 'CORE.REFERENCESCREEN.REFERENCESETTING.InitialconditionkbnYes', code: 0, checked: ReferencesKbns.get('initialconditionkbn')?.value === 0 },
+                        { caption: 'CORE.REFERENCESCREEN.REFERENCESETTING.InitialconditionkbnNo', code: 1, checked: ReferencesKbns.get('initialconditionkbn')?.value === 1 }
+                    ]">
+                </acty-radio-button>
+
+                <!-- <acty-radio-button [formControlName]="'ReferencesSettingskbn'" [label]="'CORE.REFERENCESCREEN.REFERENCESETTING.RadioOptionYes'" [value]="1"
+                    [name]="'ReferencesSettingskbn'"
+                    [checked]="ReferencesKbns.get('ReferencesSettingskbn')?.value === 1">
+                </acty-radio-button>
+
+                <acty-radio-button [formControlName]="'ReferencesSettingskbn'" [label]="'CORE.REFERENCESCREEN.REFERENCESETTING.RadioOptionNo'" [value]="2"
+                    [name]="'ReferencesSettingskbn'"
+                    [checked]="ReferencesKbns.get('ReferencesSettingskbn')?.value === 2">
+                </acty-radio-button> -->
+            </div>
+        </div>
+    </div>
+
+    <div class="dialog-footer" dialog-footer>
+        <acty-button text="{{'CORE.REFERENCESCREEN.OK'}}" [type]="'filled'" [severity]="'primary'" (click)="saveData()">
+        </acty-button>
+    </div>
+
+</acty-dialog-box>
+}

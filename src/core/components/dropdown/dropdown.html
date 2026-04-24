@@ -1,0 +1,96 @@
+<mat-form-field
+  class="dropdowm-field acty-dropdowm-field"
+  subscriptSizing="dynamic"
+  [appearance]="appearance()"
+  [floatLabel]="floatLabel()"
+  [style]="style()"
+  [ngStyle]="
+    selectControll.hasError('required') && selectControll.touched
+      ? { display: 'table-row' }
+      : {}
+  "
+>
+  @if(label()) {
+  <mat-label>{{ label() }}</mat-label>
+  }
+
+  <mat-select
+    #select
+    [matTooltip]="toolTip()"
+    [formControl]="selectControll"
+    [multiple]="isMultiple()"
+    (openedChange)="onSelectOpen()"
+    panelClass="grid-filter-select-matchmode-menu-panel select-menu-panel custom-select-panel"
+  >
+    <mat-select-trigger>
+      @if (isMultiple()) {
+      {{ getDisplayText(selectControll.value?.[0]) || '' }}
+      @if ((selectControll.value?.length || 0) > 1) {
+      <span class="example-additional-selection">
+        (+{{ (selectControll.value?.length || 0) - 1 }}
+        {{ selectControll.value?.length === 2 ? "other" : "others" }})
+      </span>
+      } } @else {
+      <span
+        class="trigger-text"
+        actyShowTooltipIfTruncated
+        [matTooltip]="
+          (getDisplayText(selectControll.value) | translate) ||
+          getDisplayText(selectControll.value)
+        "
+      >
+        {{
+          (getDisplayText(selectControll.value) | translate) ||
+            getDisplayText(selectControll.value)
+        }}
+      </span>
+      }
+    </mat-select-trigger>
+
+    @if(isSearch()){
+    <div class="custom-select-search acty-select-search">
+      <acty-textinput
+        type="text"
+        [placeholder]="placeholder()"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="filterOptions()"
+      ></acty-textinput>
+    </div>
+    } @for (data of filteredDataSource; track $index) {
+    <mat-option [value]="data[valueExpr()]">{{
+      data[displayExpr()] | translate
+    }}</mat-option>
+    }
+  </mat-select>
+
+  @if (hasSelected() && isNullable()){
+
+  <acty-button
+    matSuffix
+    type="icon"
+    leftIcon="close"
+    (click)="clearSelection($event)"
+  />
+  } @if(selectControll.hasError('required') && selectControll.touched){
+  <mat-error>This field is <strong>required</strong></mat-error>
+  }
+</mat-form-field>
+
+<div class="dropdown-hint acty-dropdown-hint" [style]="style()">
+  @if (hint() && hint()?.message) {
+  <mat-hint [class]="'acty-dropdown-' + getHintType()">
+    <div class="hint-container">
+      <div>
+        <mat-icon>{{ getHintIcon() }}</mat-icon>
+      </div>
+      <span
+        [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+        [matTooltipClass]="'acty-tooltip-' + getHintType()"
+        actyShowTooltipIfTruncated
+      >
+        {{ hint()?.message ?? "" | translate : hint()?.params }}
+      </span>
+    </div>
+  </mat-hint>
+  }
+</div>

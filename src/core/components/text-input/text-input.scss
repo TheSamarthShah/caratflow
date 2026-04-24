@@ -1,0 +1,75 @@
+@use "@angular/material" as mat;
+
+.clr-btn {
+  background: transparent;
+  border: none;
+  padding-top: var(--theme-spacing-small);
+}
+
+.text-input-field {
+  background-color: var(--theme-base);
+  border-radius: var(--theme-form-field-border-radius);
+  width: 100%;
+  height: 100%;
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  input {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  align-items: center;
+
+  // Remove default password reveal (eye) button for Edge (other browsers do not have this issue) 
+  .custom-form-field::-ms-reveal,
+  .custom-form-field::-ms-clear {
+    display: none;
+  }
+}
+
+.text-input-hint {
+  cursor: default;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-line;
+  text-wrap-mode: nowrap;
+  mat-hint {
+    display: flex;
+  }
+  .hint-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    span {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+  }
+
+  // Define your message types and their corresponding colors
+  $message-types: (
+    "error": var(--theme-danger),
+    "success": var(--theme-success),
+    "warning": var(--theme-warn),
+    "info": var(--theme-info),
+  );
+
+  // Loop over each type to generate the CSS
+  @each $type, $color in $message-types {
+    // This will create .acty-text-input-error, .acty-text-input-success, etc.
+    .acty-text-input-#{$type} {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: $color;
+      @include mat.icon-overrides(
+        (
+          color: currentColor,
+        )
+      );
+    }
+  }
+}

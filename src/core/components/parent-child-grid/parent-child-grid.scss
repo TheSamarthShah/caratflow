@@ -1,0 +1,81 @@
+.custom-splitter {
+    flex: 1 1 auto;
+    display: flex;
+    height: calc(100% );
+    max-height: calc(100% );
+ 
+    .data-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+ 
+    .filter-panel {
+      display: flex;
+      flex-direction: column;
+      //flex: 1;
+      height: 100%;
+      //overflow: hidden;
+      position: relative;
+      //z-index: 900;
+    }
+ 
+    .filter-wrapper {
+      flex: 1;
+      overflow-y: auto;
+    }
+ 
+    .filter-wrapper.collapsed {
+      height: var(--theme-filter-wrapper-min-height);
+      overflow: hidden;
+    }
+ 
+    .dataDiv {
+      height: 100%;
+    }
+    
+    /* Container holding all rows */
+    .flex-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--theme-spacing-small);
+      width: 100%;
+      height: 100%;
+      overflow-y: hidden; 
+      overflow-x: hidden;
+    }
+
+    /* Each individual row */
+    .row-wrapper {
+      display: flex;
+      flex-direction: row; /* Aligns child items horizontally */
+      gap: var(--theme-spacing-small);
+      width: 100%;
+      // height: 50%;
+      flex: 0 0 auto;
+    }
+
+    /* The items inside the row */
+    .flex-item {
+      flex: 1; /* This makes items share space equally (50/50 if two, 100 if one) */
+      min-width: 0; /* Prevents overflow issues */
+      overflow: hidden;
+    }
+
+    .screen-buttons {
+      padding: 0 var(--theme-spacing-large) 0  var(--theme-spacing-small);
+      background-color: var(--theme-surface-10);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+
+      .left-buttons-container,
+      .right-buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--theme-spacing-small);
+      }
+    }
+}

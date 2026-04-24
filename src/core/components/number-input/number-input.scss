@@ -1,0 +1,77 @@
+@use "@angular/material" as mat;
+
+.number-input-field {
+  background-color: var(--theme-base);
+  border-radius: var(--theme-form-field-border-radius);  
+  width: 100%;
+  height: 100%;
+  text-align: right;
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  input {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .number-input {
+    text-align: right;
+  }
+
+  .no-spinner::-webkit-inner-spin-button,
+.no-spinner::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner::number-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+}
+
+.number-input-hint {
+  cursor: default;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-line;
+  text-wrap-mode: nowrap;  
+  mat-hint {
+    display: flex;
+  }
+  .hint-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    span {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+  }
+
+  // Define your message types and their corresponding colors
+  $message-types: (
+    "error": var(--theme-danger),
+    "success": var(--theme-success),
+    "warning": var(--theme-warn),
+    "info": var(--theme-info),
+  );
+
+  // Loop over each type to generate the CSS
+  @each $type, $color in $message-types {
+    // This will create .acty-text-input-error, .acty-text-input-success, etc.
+    .acty-number-input-#{$type} {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: $color;
+      @include mat.icon-overrides(
+        (
+          color: currentColor,
+        )
+      );
+    }
+  }
+}

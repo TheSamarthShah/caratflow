@@ -2,37 +2,37 @@
   @if (formGroupsDictionarysignal(); as activeForm) {
   <form [formGroup]="activeForm" class="form-style" (mousedown)="onDatePickerOverlayClick()">
     <div class="group-container" #entryHeaderWrapers>
-      
-      <!-- Filter Mode Checkbox All -->
       @if (isMaterialFilter() && isCheckBoxAdded()){
         <div class="group-row">
           <div class="tabular-grid-cell tabular-grid-tabColumn">
             <div class="group-section">
-              <div class="group-field first-group-field full-width-group-contain">
-                <div style="display: flex;">
-                  <mat-checkbox
-                    [checked]="isAllCheckBoxCheck()"                  
-                    (change)="toggleSelectAll($event.checked, activeForm)">
-                  </mat-checkbox>
+
+              <div class="group-field first-group-field" [ngClass]="isMaterialFilter() ? 'full-width-group-contain' : ''">
+
+                <div style="display: flex; ">
+                  <acty-check-box
+                    [isChecked]="isAllCheckBoxCheck()"
+                    (change)="toggleSelectAll($event, activeForm)"
+                  ></acty-check-box>
                 </div>
-                <div class="field-label first-field-label border-0">
+
+                <div class="field-label first-field-label">
                   <mat-label>
                     {{ 'TASK.Search.SelectAll' | translate }}
                   </mat-label>
-                </div>               
+                </div>
               </div>
             </div>
           </div>
         </div>
       }
-
       @for (rowIndex of getAllRows(); track $index) {
         <div class="group-row">
           @for (groupNo of getColumnGroups(); track $index) {
             <div class="tabular-grid-cell tabular-grid-tabColumn" [ngClass]="(isMaterialFilter() && numberOfCols() === 2) ? 'equal-group-create' : ''">
               <div
                 class="group-section"
-                [actySyncMinWidthObserve]="groupNo + labelId()"
+                [actySyncMinWidthObserve]="groupNo +labelId()"
                 [currLanguage]="currLanguage"
                 [useIndexAttribute]="false"
                 [triggerChange]="triggerChange"
@@ -49,38 +49,53 @@
                       [ngClass]="isMaterialFilter() ? 'full-width-group-contain' : ''"
                       [class]="
                         'group-field' +
-                        (isCellUpdated(field.dataField, activeForm.value) ? ' updatedCell' : '') +
-                        (isValidateColumn(field) ? ' validate-column' : '') +
+                        (isCellUpdated(field.dataField, activeForm.value)
+                          ? ' updatedField'
+                          : '') +
+                        (hasColumnError(field.dataField, activeForm.value)
+                          ? ' errorField'
+                          : '') +
                         (first ? ' first-group-field' : ' other-group-field')
                       "
                     >
                     <div>
                       @if (isMaterialFilter() && isCheckBoxAdded()){
-                        <mat-checkbox
-                          [formControlName]="field.dataField + '_defaultVisible'"
-                          (change)="onInputFinished($event, field, field.dataField)"
-                          [disabled]="isRequiredColumnForSearch(field.dataField)">
-                        </mat-checkbox>
+                      <acty-check-box
+                        [formControlName]="field.dataField + '_defaultVisible'"
+                        [showParent]="false"
+                        (selectionChange)="onInputFinished($event,field,field.dataField)"
+                        [isDisabled]="isRequiredColumnForSearch(field.dataField)"
+                      ></acty-check-box>
                       }
                     </div>
-
                       @if (field.editorType != "10") {
                         <div
-                          [actyObserveClass]="['is-wrapped-row', 'is-wrapped-section']"
+                          [actyObserveClass]="[
+                            'is-wrapped-row',
+                            'is-wrapped-section',
+                          ]"
                           #wrapState="actyObservingClass"
-                          [actySyncMinWidthObserve]="getLabelKey(wrapState.isWrapped, first, groupNo)"
+                          [actySyncMinWidthObserve]="
+                            getLabelKey(wrapState.isWrapped, first, groupNo)
+                          "
                           [currLanguage]="currLanguage"
                           [useIndexAttribute]="true"
                           [keyPrefix]="'field-label-'"
                           [class]="'field-label'"
                           [class.first-field-label]="first"
-                          [class.required-column-header]="isRequiredColumn(field.dataField)"
+                          [class.required-column-header]="
+                            isRequiredColumn(field.dataField)
+                          "
                         >
                           <mat-label
                             [matTooltip]="getColumnTooltip(field.dataField)"
                             matTooltipPosition="above"
                             matTooltipClass="multiline-tooltip"
-                            [class]="isRequiredColumn(field.dataField) ? ' required-column-header' : ''"
+                            [class]="
+                              isRequiredColumn(field.dataField)
+                                ? ' required-column-header'
+                                : ''
+                            "
                           >
                             {{ field.caption | translate }}
                             @if(field.searchRequired && isMaterialFilter()) {
@@ -93,334 +108,747 @@
                         </div>
                       } @else {
                         <div
-                          [actyObserveClass]="['is-wrapped-row', 'is-wrapped-section']"
+                          [actyObserveClass]="[
+                            'is-wrapped-row',
+                            'is-wrapped-section',
+                          ]"
                           #wrapState="actyObservingClass"
-                          [actySyncMinWidthObserve]="getLabelKey(wrapState.isWrapped, first, groupNo)"
+                          [actySyncMinWidthObserve]="
+                            getLabelKey(wrapState.isWrapped, first, groupNo)
+                          "
                           [currLanguage]="currLanguage"
                           [useIndexAttribute]="true"
                           [class]="'field-label'"
                           [class.first-field-label]="first"
-                          [class.required-field-label]="isRequiredColumn(field.dataField)"
+                          [class.required-field-label]="
+                            isRequiredColumn(field.dataField)
+                          "
                         >
                           <mat-label
                             [matTooltip]="getColumnTooltip(field.dataField)"
                             matTooltipPosition="above"
                             matTooltipClass="multiline-tooltip"
-                          ></mat-label>
+                          >
+                          </mat-label>
                         </div>
                       }
 
                       <div class="field-value" [ngClass]="isMaterialFilter() ?'field-value-full-width' : ''" #formFieldsWrapper>
                         @switch (field.editorType) {
-                          <!-- Editor Type 1: Text -->
                           @case ("1") {
                             @if (field.isEditable && !field?.isDisabledField) {
                               <div class="input-row-container">
-                                <mat-form-field appearance="outline" 
-                                  [class.component-full-width]="isMaterialFilter()"
-                                  [style.width]="!isMaterialFilter() ? getColumnMaxlengthWidth(field.dataField) : null"
-                                  #focusableCell>
-                                  <input matInput 
-                                    [formControlName]="field.dataField"
-                                    [readonly]="field.disableInputBox"
-                                    [maxLength]="field.maxLength ?? null"
-                                    (change)="onInputFinished($event, field, field.dataField)"
-                                    (ngModelChange)="onRowDataUpdate(field)" />
-                                  @if (field.isReferenceScreen) {
-                                    <div matSuffix class="flex items-center">
-                                      <acty-reference-screen-button
-                                        [referenceScreenId]="field.referenceScreenId ?? ''"
-                                        [disabled]="!field.isEditable"
-                                        [refForColumn]="field.dataField"
-                                        [refRelations]="getReferenceRelation(field.refRelations)"
-                                        [selectedValue]="activeForm.get(field.dataField)?.value"
-                                        [gridRefData]="refScreenOnRowData()"
-                                        [formId]="formId()"
-                                        [userId]="userId"
-                                        [tabId]="tabId()"
-                                        (referenceSelected)="onReferenceSelected($event, field.dataField)">
-                                      </acty-reference-screen-button>
-                                    </div>
-                                  }
-                                  @if (isValidateColumn(field)) {
-                                    <mat-error>{{ getInvalidMessage(field.dataField)?.message | translate }}</mat-error>
-                                  }
-                                </mat-form-field>
-
-                                @if(field.showMatchType == true && isMaterialFilter()){
-                                <div class="conditionDropdownWrapper">   
-                                  <mat-form-field appearance="outline" class="w-full" #focusableCell>
-                                    <mat-select [formControlName]="field.dataField + '_Conditions'">
-                                      @for(cond of activeForm.get(field.dataField+'_filterConditions')?.value; track cond.option) {
-                                        <mat-option [value]="cond.option">{{ cond.option | translate }}</mat-option>
-                                      }
-                                    </mat-select>
-                                  </mat-form-field>
-                                </div>
-                                @if (activeForm.get(field.dataField + '_Conditions')?.value === 'TASK.Search.~' && field.showMatchType == true) {
-                                  <mat-form-field appearance="outline" 
-                                    [class.component-full-width]="isMaterialFilter()"
-                                    #focusableCell>
-                                    <input matInput 
-                                      [formControlName]="field.dataField+'_To'"
-                                      [readonly]="field.disableInputBox"
-                                      [maxLength]="field.maxLength ?? null"
-                                      (change)="onInputFinished($event, field, field.dataField+'_To', true)"
-                                      (ngModelChange)="onRowDataUpdate(field, true)" />
-                                    @if (field.isReferenceScreen) {
-                                      <div matSuffix class="flex items-center">
-                                        <acty-reference-screen-button
-                                          [referenceScreenId]="field.referenceScreenId ?? ''"
-                                          [refForColumn]="field.dataField+'_To'"
-                                          [refRelations]="getReferenceRelation(field.refRelations)"
-                                          [selectedValue]="activeForm.get(field.dataField+'_To')?.value"
-                                          [formId]="formId()"
-                                          [userId]="userId"
-                                          (referenceSelected)="onReferenceSelected($event, field.dataField+'_To', true)"
-                                          [skipMasterFilterDefaultValue]="true">
-                                        </acty-reference-screen-button>
-                                      </div>
-                                    }
-                                    @if (isValidateColumn(field, true)) {
-                                      <mat-error>{{ getInvalidMessage(field.dataField+'_To')?.message | translate }}</mat-error>
-                                    }
-                                  </mat-form-field>
-                                }
-                                }
-                              </div>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ activeForm.get(field.dataField)?.value }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 2: Number -->
-                          @case ("2") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <div class="input-row-container">
-                                <mat-form-field appearance="outline" 
-                                  [class.component-full-width]="isMaterialFilter()"
-                                  [style.width]="!isMaterialFilter() ? getColumnMaxlengthWidth(field.dataField) : null"
-                                  #focusableCell>
-                                  <input matInput type="number" 
-                                    [formControlName]="field.dataField"
-                                    [readonly]="field.disableInputBox"
-                                    [min]="field.minValue"
-                                    [max]="field.maxValue"
-                                    (change)="onInputFinished($event, field, field.dataField)"
-                                    (ngModelChange)="onRowDataUpdate(field)" />
-                                  @if (isValidateColumn(field)) {
-                                    <mat-error>{{ getInvalidMessage(field.dataField)?.message | translate }}</mat-error>
-                                  }
-                                </mat-form-field>
-
-                                @if(field.showMatchType == true && isMaterialFilter()){
-                                <div class="conditionDropdownWrapper">   
-                                  <mat-form-field appearance="outline" class="w-full" #focusableCell>
-                                    <mat-select [formControlName]="field.dataField + '_Conditions'">
-                                      @for(cond of activeForm.get(field.dataField+'_filterConditions')?.value; track cond.option) {
-                                        <mat-option [value]="cond.option">{{ cond.option | translate }}</mat-option>
-                                      }
-                                    </mat-select>
-                                  </mat-form-field>
-                                </div>
-                                @if (activeForm.get(field.dataField + '_Conditions')?.value === 'TASK.Search.~' && field.showMatchType == true) {
-                                  <mat-form-field appearance="outline" 
-                                    [class.component-full-width]="isMaterialFilter()"
-                                    #focusableCell>
-                                    <input matInput type="number"
-                                      [formControlName]="field.dataField+'_To'"
-                                      [readonly]="field.disableInputBox"
-                                      [min]="field.minValue"
-                                      [max]="field.maxValue"
-                                      (change)="onInputFinished($event, field, field.dataField+'_To', true)"
-                                      (ngModelChange)="onRowDataUpdate(field, true)" />
-                                    @if (isValidateColumn(field, true)) {
-                                      <mat-error>{{ getInvalidMessage(field.dataField+'_To')?.message | translate }}</mat-error>
-                                    }
-                                  </mat-form-field>
-                                }
-                                }
-                              </div>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ activeForm.get(field.dataField)?.value | actyNumber:currLanguage }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 3: Date -->
-                          @case ("3") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <div class="input-row-container">
-                                <mat-form-field appearance="outline" 
-                                  [class.component-full-width]="isMaterialFilter()"
-                                  [style.width]="!isMaterialFilter() ? getColumnMaxlengthWidth(field.dataField, field.dateFormat) : null"
-                                  #focusableCell>
-                                  <input matInput [matDatepicker]="pickerFrom"
-                                    [formControlName]="field.dataField"
-                                    [readonly]="field.disableInputBox"
-                                    (focus)="openCustomDatePicker(field.dataField)"
-                                    (dateChange)="onInputFinished($event, field, field.dataField)"
-                                    (ngModelChange)="onRowDataUpdate(field)" />
-                                  <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-                                  <mat-datepicker #pickerFrom></mat-datepicker>
-                                  @if (isValidateColumn(field)) {
-                                    <mat-error>{{ getInvalidMessage(field.dataField)?.message | translate }}</mat-error>
-                                  }
-                                </mat-form-field>
-
-                                @if(field.showMatchType == true && isMaterialFilter()){
-                                <div class="conditionDropdownWrapper">   
-                                  <mat-form-field appearance="outline" class="w-full" #focusableCell>
-                                    <mat-select [formControlName]="field.dataField + '_Conditions'">
-                                      @for(cond of activeForm.get(field.dataField+'_filterConditions')?.value; track cond.option) {
-                                        <mat-option [value]="cond.option">{{ cond.option | translate }}</mat-option>
-                                      }
-                                    </mat-select>
-                                  </mat-form-field>
-                                </div>
-                                @if (activeForm.get(field.dataField + '_Conditions')?.value === 'TASK.Search.~' && field.showMatchType == true) {
-                                  <mat-form-field appearance="outline" 
-                                    [class.component-full-width]="isMaterialFilter()"
-                                    #focusableCell>
-                                    <input matInput [matDatepicker]="pickerTo"
-                                      [formControlName]="field.dataField+'_To'"
-                                      [readonly]="field.disableInputBox"
-                                      (focus)="openCustomDatePicker(field.dataField+'_To')"
-                                      (dateChange)="onInputFinished($event, field, field.dataField+'_To', true)"
-                                      (ngModelChange)="onRowDataUpdate(field, true)" />
-                                    <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
-                                    <mat-datepicker #pickerTo></mat-datepicker>
-                                    @if (isValidateColumn(field, true)) {
-                                      <mat-error>{{ getInvalidMessage(field.dataField+'_To')?.message | translate }}</mat-error>
-                                    }
-                                  </mat-form-field>
-                                }
-                                }
-                              </div>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ activeForm.get(field.dataField)?.value | actyDate: translate.currentLang:field.dateFormat }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 4: Dropdown/Select -->
-                          @case ("4") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <mat-form-field appearance="outline" 
-                                [class.component-full-width]="isMaterialFilter()"
-                                [style.width]="!isMaterialFilter() ? getColumnMaxlengthWidth(field.dataField) : null"
-                                #focusableCell>
-                                <mat-select 
-                                  [formControlName]="field.dataField"
-                                  (selectionChange)="onInputFinished($event, field, field.dataField)">
-                                  @for(opt of field.memberList; track opt.code) {
-                                    <mat-option [value]="opt.code">{{ opt.caption }}</mat-option>
-                                  }
-                                </mat-select>
-                                @if (isValidateColumn(field)) {
-                                  <mat-error>{{ getInvalidMessage(field.dataField)?.message | translate }}</mat-error>
-                                }
-                              </mat-form-field>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ (getKBNNmUsingKey(activeForm.get(field.dataField)?.value, field) ?? '') | translate }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 5: Single Checkbox -->
-                          @case ("5") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <mat-checkbox 
-                                [checked]="activeForm.get(field.dataField)?.value === '1'"
-                                [disabled]="field.disableInputBox"
-                                (change)="onCheckboxValueChange(activeForm.value, field.dataField, $event.checked ? '1' : '0', tabId()); onInputFinished($event, field, field.dataField)"
-                                #focusableCell>
-                                {{ field.caption | translate }}
-                              </mat-checkbox>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ activeForm.get(field.dataField)?.value === '1' ? 'Yes' : 'No' }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 6: Radio Buttons -->
-                          @case ("6") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <mat-radio-group 
+                              <acty-textinput
+                                #headerInput
                                 [formControlName]="field.dataField"
-                                [disabled]="field.disableInputBox ?? false"
-                                (change)="onInputFinished($event, field, field.dataField)"
-                                class="flex gap-2"
-                                #focusableCell>
-                                @for (opt of getChildren(field); track opt.code) {
-                                  <mat-radio-button [value]="opt.code">{{ opt.caption }}</mat-radio-button>
-                                }
-                              </mat-radio-group>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ (getKBNNmUsingKey(activeForm.get(field.dataField)?.value, field) ?? '') | translate }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 7: Multiple Checkboxes -->
-                          @case ("7") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <div class="flex gap-3 items-center">
-                                @for(opt of field.memberList; track opt.code) {
-                                  <mat-checkbox 
-                                    [checked]="activeForm.get(field.dataField)?.value?.includes(opt.code)"
-                                    [disabled]="field.disableInputBox"
-                                    (change)="onMultiCheckboxChange(field.dataField, opt.code, $event.checked); onInputFinished($event, field, field.dataField)">
-                                    {{ opt.caption }}
-                                  </mat-checkbox>
-                                }
-                              </div>
-                            } @else {
-                              <div class="field-value-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ activeForm.get(field.dataField)?.value?.join(', ') }}
-                              </div>
-                            }
-                          }
-                          <!-- Editor Type 8: Textarea -->
-                          @case ("8") {
-                            @if (field.isEditable && !field?.isDisabledField) {
-                              <mat-form-field appearance="outline" 
                                 [class.component-full-width]="isMaterialFilter()"
-                                [style.width]="!isMaterialFilter() ? getColumnMaxlengthWidth(field.dataField) : null"
-                                #focusableCell>
-                                <textarea matInput 
-                                  rows="2"
-                                  [formControlName]="field.dataField"
-                                  [readonly]="field.disableInputBox"
-                                  (change)="onInputFinished($event, field, field.dataField)"
-                                  (ngModelChange)="onRowDataUpdate(field)"></textarea>
-                                @if (isValidateColumn(field)) {
-                                  <mat-error>{{ getInvalidMessage(field.dataField)?.message | translate }}</mat-error>
+                                [style]="!isMaterialFilter() ?
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField) :''
+                                "
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [class.updatedCell]="
+                                  isFieldUpdated(field.dataField)
+                                "
+                                [class.validate-column]="
+                                  isValidateColumn(field)
+                                "
+                                [hint]="getInvalidMessage(field.dataField)"
+                                (hintChange)="
+                                  onInputInternalHintChange($event, field.dataField)
+                                "
+                                (change)="onInputFinished($event,field,field.dataField)"
+                                (valueChanged)="
+                                  onInputFinished($event,field,field.dataField, true)
+                                "
+                                (blurEvent)="onBlurEvent($event,field)"
+                                (ngModelChange)="
+                                  onRowDataUpdate(field)
+                                "
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                [type]="field.isProtected ? 'password' : 'text'"
+                                [maxLength]="field.maxLength"
+                                #focusableCell
+                              >
+                                @if (field.isReferenceScreen) {
+                                  <acty-reference-screen-button
+                                    suffix-button
+                                    [referenceScreenId]="
+                                      field.referenceScreenId ?? ''
+                                    "
+                                    [disabled]="!field.isEditable"
+                                    class="icons reference-button"
+                                    [refForColumn]="field.dataField"
+                                    [refRelations]="getReferenceRelation(field.refRelations)"
+                                    [selectedValue]="
+                                      activeForm.value[field.dataField]
+                                    "
+                                    [gridRefData]="refScreenOnRowData()"
+                                    [formId]="formId()"
+                                    [userId]="userId"
+                                    [tabId]="tabId()"
+                                    (referenceSelected)="
+                                      onReferenceSelected(
+                                        $event,
+                                        field.dataField
+                                      )
+                                    "
+                                  />
                                 }
-                              </mat-form-field>
-                            } @else {
-                              <div class="field-value-readonly textarea-readonly" [style]="'width:' + getColumnMaxlengthWidth(field.dataField)">
-                                {{ activeForm.get(field.dataField)?.value }}
+                              </acty-textinput>
+                              @if(field.showMatchType == true && isMaterialFilter()){
+                              <div class="conditionDropdownWrapper">
+                                <acty-dropdown
+                                  #condDD
+                                  [dataSource]="this.formGroupsDictionarysignal()?.get(field.dataField+'_filterConditions')?.value"
+                                  [displayExpr]="'option'"
+                                  [valueExpr]="'option'"
+                                  [isNullable]="false"
+                                  [isSearch]="false"
+                                  [required]="false"
+                                  [isDisabled]="(field.disableInputBox ?? false) || field.searchRequired === 'BOTH'"
+                                  [selectedValue]="
+                                    formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.value
+                                  "
+                                  (selectionChange)="
+                                    formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.setValue($event)
+                                  "
+                                  #focusableCell
+                                >
+                                </acty-dropdown>
                               </div>
-                            }
-                          }
-                          <!-- Default Fallback to Text -->
-                          @default {
-                            <mat-form-field appearance="outline" 
-                              [class.component-full-width]="isMaterialFilter()"
-                              [style.width]="!isMaterialFilter() ? getColumnMaxlengthWidth(field.dataField) : null"
-                              #focusableCell>
-                              <input matInput 
-                                [formControlName]="field.dataField"
-                                [readonly]="field.disableInputBox"
-                                [maxLength]="field.maxLength ?? null"
-                                (change)="onInputFinished($event, field, field.dataField)"
-                                (ngModelChange)="onRowDataUpdate(field)" />
-                              @if (isValidateColumn(field)) {
-                                <mat-error>{{ getInvalidMessage(field.dataField)?.message | translate }}</mat-error>
+                              @if ( formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.value ===
+                                'TASK.Search.~' && field.showMatchType == true) {
+                              <acty-textinput
+                                #headerInput
+                                [formControlName]="field.dataField+'_To'"
+                                [class.component-full-width]="isMaterialFilter()"
+                                [class.updatedCell]="
+                                  isFieldUpdated(field.dataField+'_To')
+                                "
+                                [class.validate-column]="
+                                  isValidateColumn(field,true)
+                                "
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [hint]="getInvalidMessage(field.dataField+'_To')"
+                                (hintChange)="
+                                  onInputInternalHintChange($event, field.dataField)
+                                "
+                                (change)="onInputFinished($event, field,field.dataField+'_To',true)"
+                                (valueChanged)="
+                                  onInputFinished($event, field,field.dataField+'_To',true)
+                                "
+                                (ngModelChange)="
+                                  onRowDataUpdate(field,true)
+                                "
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                [maxLength]="field.maxLength"
+                                #focusableCell
+                              >
+                              @if (field.isReferenceScreen) {
+                                  <acty-reference-screen-button
+                                    suffix-button
+                                    [referenceScreenId]="field.referenceScreenId ?? ''"
+                                    class="icons reference-button"
+                                    [refForColumn]="field.dataField+'_To'"
+                                    [refRelations]="getReferenceRelation(field.refRelations)"
+                                    [selectedValue]="formGroupsDictionarysignal()?.value[field.dataField+'_To']"
+                                    [formId]="formId()"
+                                    [userId]="userId"
+                                    (referenceSelected)="onReferenceSelected($event,field.dataField+'_To',true)"
+                                    [skipMasterFilterDefaultValue]="true"
+                                  />
                               }
-                            </mat-form-field>
+                              </acty-textinput>
+                            }
+                            }
+                            </div>
+                            } @else {
+                              <div
+                                class="field-value-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{ field.isProtected ? '•••••' :activeForm.value[field.dataField] }}
+                              </div>
+                            }
+                          }
+                          @case ("2") {
+                            @if (field.isEditable) {
+                              <div class="input-row-container">
+                                <acty-numberinput
+                                  #headerInput
+                                  [formControlName]="field.dataField"
+                                  [isDisabled]="field.disableInputBox ?? false"
+                                  [attr.data-input-for]="field.dataField"
+                                  [showButtons]="
+                                    field.isSpinButton
+                                      ? field.isSpinButton
+                                      : false
+                                  "
+                                  [maxValue]="field.maxValue"
+                                  [minValue]="field.minValue"
+                                  [dataPrecision]="field.dataPrecision"
+                                  [dataScale]="field.dataScale ?? 3"
+                                  [class.component-full-width]="isMaterialFilter()"
+                                  [style]="!isMaterialFilter() ?
+                                  'width:' +
+                                    getColumnMaxlengthWidth(field.dataField) :''
+                                  "
+                                  [class.validate-column]="
+                                    isValidateColumn(field)
+                                  "
+                                  [class.updatedCell]="
+                                    isFieldUpdated(field.dataField)
+                                  "
+                                  [hint]="getInvalidMessage(field.dataField)"
+                                  (hintChange)="
+                                    onInputInternalHintChange($event, field.dataField)
+                                  "
+                                  (ngModelChange)="
+                                    onRowDataUpdate(field)
+                                  "
+                                  (change)="onInputFinished($event,field,field.dataField)"
+                                  (valueChanged)="onInputFinished($event,field,field.dataField)"
+                                  (blurEvent)="onBlurEvent($event,field)"
+                                  [class]="
+                                    isRequiredFormField(field)
+                                      ? 'entry-require-column'
+                                      : ''
+                                  "
+                                  #focusableCell
+                                >
+                                @if (field.isReferenceScreen) {
+                                  <acty-reference-screen-button
+                                    suffix-button
+                                    [referenceScreenId]="
+                                      field.referenceScreenId ?? ''
+                                    "
+                                    [disabled]="!field.isEditable"
+                                    class="icons reference-button"
+                                    [refForColumn]="field.dataField"
+                                    [refRelations]="getReferenceRelation(field.refRelations)"
+                                    [selectedValue]="
+                                      activeForm.value[field.dataField]
+                                    "
+                                    [gridRefData]="refScreenOnRowData()"
+                                    [formId]="formId()"
+                                    [userId]="userId"
+                                    [tabId]="tabId()"
+                                    (referenceSelected)="
+                                      onReferenceSelected(
+                                        $event,
+                                        field.dataField
+                                      )
+                                    "
+                                  />
+                                }
+                                </acty-numberinput>
+                                 @if(field.showMatchType == true){
+                              <div class="conditionDropdownWrapper">
+                                <acty-dropdown
+                                  #condDD
+                                  [dataSource]="this.formGroupsDictionarysignal()?.get(field.dataField+'_filterConditions')?.value"
+                                  [displayExpr]="'option'"
+                                  [valueExpr]="'option'"
+                                  [isNullable]="false"
+                                  [isSearch]="false"
+                                  [required]="false"
+                                   [isDisabled]="(field.disableInputBox ?? false) || field.searchRequired === 'BOTH'"
+                                  [selectedValue]="
+                                    formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.value
+                                  "
+                                  (selectionChange)="
+                                    formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.setValue($event)
+                                  "
+                                  #focusableCell
+                                >
+                                </acty-dropdown>
+                              </div>
+                              @if ( formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.value ===
+                                'TASK.Search.~' && field.showMatchType == true) {
+                              <acty-numberinput
+                                  #headerInput
+                                  [formControlName]="field.dataField+'_To'"
+                                  [isDisabled]="field.disableInputBox ?? false"
+                                  [attr.data-input-for]="field.dataField"
+                                  [showButtons]="
+                                    field.isSpinButton
+                                      ? field.isSpinButton
+                                      : false
+                                  "
+                                  [maxValue]="field.maxValue"
+                                  [minValue]="field.minValue"
+                                  [dataPrecision]="field.dataPrecision"
+                                  [dataScale]="field.dataScale ?? 3"
+                                  [class.component-full-width]="isMaterialFilter()"
+                                  [style]="!isMaterialFilter() ?
+                                    'width:' +
+                                    getColumnMaxlengthWidth(field.dataField) :''
+                                  "
+                                  [class.validate-column]="
+                                    isValidateColumn(field,true)
+                                  "
+                                  [class.updatedCell]="
+                                    isFieldUpdated(field.dataField+'_To')
+                                  "
+                                  [hint]="getInvalidMessage(field.dataField+'_To')"
+                                  (hintChange)="
+                                    onInputInternalHintChange($event, field.dataField)
+                                  "
+                                  (ngModelChange)="
+                                    onRowDataUpdate(field,true)
+                                  "
+                                  (change)="onInputFinished($event,field,field.dataField+'_To')"
+                                  (valueChanged)="onInputFinished($event,field,field.dataField+'_To')"
+                                  [class]="
+                                    isRequiredFormField(field)
+                                      ? 'entry-require-column'
+                                      : ''
+                                  "
+                                  #focusableCell
+                                >
+                                </acty-numberinput>
+                            }
+                            }
+                              </div>
+                            } @else {
+                              <div
+                                class="field-value-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{ activeForm.value[field.dataField] | actyNumber:currLanguage }}
+                              </div>
+                            }
+                          }
+                          @case ("3") {
+                            @if (field.isEditable) {
+                                <div class="input-row-container">
+                                <acty-date-time
+                                #headerInput
+                                type="date"
+                                [required]="false"
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [readOnly]="!(!isMaterialFilter() || !isCheckBoxAdded())"
+                                [isDatePickerVisible]="!isMaterialFilter() || !isCheckBoxAdded()"
+                                [formControlName]="field.dataField"
+                                [class.component-full-width]="isMaterialFilter()"
+                                [style]="!isMaterialFilter() ?
+                                    'width:' +
+                                    getColumnMaxlengthWidth(
+                                      field.dataField,
+                                      field.dateFormat
+                                    ) :''
+                                  "
+                                [class.validate-column]="
+                                  isValidateColumn(field)
+                                "
+                                [class.updatedCell]="
+                                    isFieldUpdated(field.dataField)
+                                  "
+                                [dateFormat]="field.dateFormat"
+                                (focusin)="openCustomDatePicker(field.dataField)"
+                                [hint]="getInvalidMessage(field.dataField)"
+                                (hintChange)="
+                                    onInputInternalHintChange($event, field.dataField)
+                                  "
+                                (valueChanged)="
+                                  onInputFinished($event,field,field.dataField)
+                                "
+                                (ngModelChange)="
+                                  onRowDataUpdate(field)
+                                "
+                                (change)="onInputFinished($event,field,field.dataField)"
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                (valueChange)="onBlurEvent($event, field)"
+                                #focusableCell
+                              >
+                              </acty-date-time>
+                                @if(field.showMatchType == true){
+                                <div class="conditionDropdownWrapper">
+                                  <acty-dropdown
+                                    #condDD
+                                    [dataSource]="this.formGroupsDictionarysignal()?.get(field.dataField+'_filterConditions')?.value"
+                                    [displayExpr]="'option'"
+                                    [valueExpr]="'option'"
+                                    [isNullable]="false"
+                                    [isSearch]="false"
+                                    [required]="false"
+                                    [isDisabled]="(field.disableInputBox ?? false) || field.searchRequired === 'BOTH'"
+                                    [selectedValue]="
+                                      formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.value
+                                    "
+                                    (selectionChange)="
+                                      formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.setValue($event)
+                                    "
+                                    #focusableCell
+                                  >
+                                  </acty-dropdown>
+                                </div>
+                                @if ( formGroupsDictionarysignal()?.get(field.dataField + '_Conditions')?.value ===
+                                  'TASK.Search.~' && field.showMatchType == true) {
+                                <acty-date-time
+                                  #headerInput
+                                  type="date"
+                                  [required]="false"
+                                  [isDisabled]="field.disableInputBox ?? false"
+                                  [readOnly]="!(!isMaterialFilter() || !isCheckBoxAdded())"
+                                  [isDatePickerVisible]="!isMaterialFilter() || !isCheckBoxAdded()"
+                                  [formControlName]="field.dataField+'_To'"
+                                  [dateFormat]="field.dateFormat"
+
+                                  [class.component-full-width]="isMaterialFilter()"
+                                  [style]="!isMaterialFilter() ?
+                                    'width:' +
+                                    getColumnMaxlengthWidth(
+                                      field.dataField,
+                                      field.dateFormat
+                                    ) :''
+                                  "
+                                  (hintChange)="
+                                    onInputInternalHintChange($event, field.dataField)
+                                  "
+                                  (focusin)="openCustomDatePicker(field.dataField+'_To')"
+                                  [hint]="getInvalidMessage(field.dataField+'_To')"
+                                  (ngModelChange)="
+                                    onRowDataUpdate(field,true)
+                                  "
+                                  [class.validate-column]="
+                                    isValidateColumn(field)
+                                  "
+                                  [class.updatedCell]="
+                                    isFieldUpdated(field.dataField)
+                                  "
+                                  (valueChanged)="
+                                    onInputFinished($event,field,field.dataField)
+                                  "
+                                  (change)="onInputFinished($event,field,field.dataField)"
+                                  [class]="
+                                    isRequiredFormField(field)
+                                      ? 'entry-require-column'
+                                      : ''
+                                  "
+                                  #focusableCell
+                                >
+                                </acty-date-time>
+                              }
+                              }
+                            </div>
+
+                            } @else {
+                              <div
+                                class="field-value-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{
+                                  activeForm.value[field.dataField]
+                                    | actyDate: translate.currentLang:field.dateFormat
+                                }}
+                              </div>
+                            }
+                          }
+                          @case ("4") {
+                            @if (field.isEditable) {
+                              <acty-dropdown
+                                #headerInput
+                                [dataSource]="field.memberList ?? []"
+                                [displayExpr]="'caption'"
+                                [valueExpr]="'code'"
+                                [formControlName]="field.dataField"
+                                [isSearch]="false"
+                                [required]="false"
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [selectedValue]="
+                                  activeForm.get(field.dataField)?.value
+                                "
+                                [class.validate-column]="
+                                  isValidateColumn(field)
+                                "
+                                [class.updatedCell]="
+                                  isFieldUpdated(field.dataField)
+                                "
+                                [isNullable]="false"
+                                [hint]="getInvalidMessage(field.dataField)"
+                                (hintChange)="
+                                  onInputInternalHintChange($event, field.dataField)
+                                "
+                                [class.component-full-width]="isMaterialFilter()"
+                                [style]="!isMaterialFilter() ?
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField) :'component-full-width'
+                                "
+                                (selectionChange)="
+                                  activeForm
+                                    .get(field.dataField)
+                                    ?.setValue($event);
+                                  onInputFinished($event,field,field.dataField);
+                                  onBlurEvent($event, field)
+                                "
+                                (ngModelChange)="
+                                  onRowDataUpdate(field)
+                                "
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                #focusableCell
+                              >
+                              </acty-dropdown>
+                            } @else {
+                              <div
+                                class="field-value-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{
+                                  (getKBNNmUsingKey(
+                                    activeForm.get(field.dataField)?.value,
+                                    field
+                                  ) ?? '') | translate
+                                }}
+                              </div>
+                            }
+                          }
+                          @case ("5") {
+                            <acty-check-box
+                              #headerInput
+                              [align]="'before'"
+                              [showParent]="false"
+                              [isDisabled]="!field.isEditable || (field.disableInputBox ?? false)"
+                              [isChecked]="
+                                activeForm.value[field.dataField] === '1'
+                              "
+                              (change)="
+                                onCheckboxValueChange(
+                                  activeForm.value,
+                                  field.dataField,
+                                  $event ? '1' : '0',
+                                  '1'
+                                );
+                                onInputFinished($event,field,field.dataField);
+                                onBlurEvent($event, field)
+                              "
+                              [class.validate-column]="isValidateColumn(field)"
+                              [class.updatedCell]="
+                                isFieldUpdated(field.dataField)
+                              "
+                              [hint]="getInvalidMessage(field.dataField)"
+                              (hintChange)="
+                                onInputInternalHintChange($event, field.dataField)
+                              "
+                              (click)="
+                                $event.stopPropagation(); onRowDataUpdate(field)
+                              "
+                              (ngModelChange)="onRowDataUpdate(field)"
+                              [class]="
+                                isRequiredFormField(field)
+                                  ? 'entry-require-column'
+                                  : ''
+                              "
+                              #focusableCell
+                            >
+                            </acty-check-box>
+                          }
+                          @case ("6") {
+                            @if (field.isEditable) {
+                              <acty-radio-button
+                                #headerInput
+                                [formControlName]="field.dataField"
+                                [name]="field.dataField"
+                                [children]="getChildren(field)"
+                                [class.updatedCell]="
+                                  isFieldUpdated(field.dataField)
+                                "
+                                [class.validate-column]="
+                                  isValidateColumn(field)
+                                "
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [hint]="getInvalidMessage(field.dataField)"
+                                (hintChange)="
+                                  onInputInternalHintChange($event, field.dataField)
+                                "
+                                (selectionChange)="onInputFinished($event,field,field.dataField)"
+                                (ngModelChange)="
+                                  onRowDataUpdate(field)
+                                "
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                #focusableCell
+                              >
+                              </acty-radio-button>
+                            } @else {
+                              <div
+                                class="field-value-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{
+                                  (getKBNNmUsingKey(
+                                    activeForm.value[field.dataField],
+                                    field
+                                  ) ?? '') | translate
+                                }}
+                              </div>
+                            }
+                          }
+                          @case ("7") {
+                            @if (field.isEditable) {
+                              <acty-check-box
+                                #headerInput
+                                [formControlName]="field.dataField"
+                                [label]="field.caption | translate"
+                                [children]="field.memberList || []"
+                                [showParent]="true"
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [class.updatedCell]="
+                                  isFieldUpdated(field.dataField)
+                                "
+                                [class.validate-column]="
+                                  isValidateColumn(field)
+                                "
+                                [hint]="getInvalidMessage(field.dataField)"
+                                (hintChange)="
+                                  onInputInternalHintChange($event, field.dataField)
+                                "
+                                (change)="onInputFinished($event,field,field.dataField)"
+                                (ngModelChange)="
+                                  onRowDataUpdate(field)
+                                "
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                #focusableCell
+                              >
+                              </acty-check-box>
+                            } @else {
+                              <div
+                                class="field-value-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{
+                                  (getKBNNmUsingKey(
+                                    activeForm.value[field.dataField],
+                                    field
+                                  ) ?? '') | translate
+                                }}
+                              </div>
+                            }
+                          }
+                          @case ("8") {
+                            @if (field.isEditable) {
+                              <acty-text-area
+                                #headerInput
+                                [rows]="1"
+                                [formControlName]="field.dataField"
+                                [class.component-full-width]="isMaterialFilter()"
+                                [style]="!isMaterialFilter() ?
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField) :''
+                                "
+                                [isDisabled]="field.disableInputBox ?? false"
+                                [class.updatedCell]="
+                                  isFieldUpdated(field.dataField)
+                                "
+                                [class.validate-column]="
+                                  isValidateColumn(field)
+                                "
+                                [hint]="getInvalidMessage(field.dataField)"
+                                (hintChange)="
+                                  onInputInternalHintChange($event, field.dataField)
+                                "
+                                (change)="onInputFinished($event,field,field.dataField)"
+                                (valueChanged)="onInputFinished($event,field,field.dataField)"
+                                (ngModelChange)="
+                                  onRowDataUpdate(field)
+                                "
+                                [class]="
+                                  isRequiredFormField(field)
+                                    ? 'entry-require-column'
+                                    : ''
+                                "
+                                (blurEvent)="onBlurEvent($event,field)"
+                                [maxLength]="field.maxLength"
+                                #focusableCell
+                              >
+                              </acty-text-area>
+                            } @else {
+                              <div
+                                class="field-value-readonly textarea-readonly"
+                                [style]="
+                                  'width:' +
+                                  getColumnMaxlengthWidth(field.dataField)
+                                "
+                              >
+                                {{ activeForm.value[field.dataField] }}
+                              </div>
+                            }
+                          }
+                          @default {
+                            <acty-textinput
+                              #headerInput
+                              [formControlName]="field.dataField"
+                              [isDisabled]="field.disableInputBox ?? false"
+                              [class.component-full-width]="isMaterialFilter()"
+                              [style]="!isMaterialFilter() ?
+                                'width:' +
+                                getColumnMaxlengthWidth(field.dataField) :''
+                              "
+                              [class.validate-column]="isValidateColumn(field)"
+                              [class.updatedCell]="
+                                isFieldUpdated(field.dataField)
+                              "
+                              [hint]="getInvalidMessage(field.dataField)"
+                              (hintChange)="
+                                onInputInternalHintChange($event, field.dataField)
+                              "
+                              (change)="onInputFinished($event,field,field.dataField)"
+                              (valueChanged)="onInputFinished($event,field,field.dataField, true)"
+                              (ngModelChange)="
+                                onRowDataUpdate(field)
+                              "
+                              [class]="
+                                isRequiredFormField(field)
+                                  ? 'entry-require-column'
+                                  : ''
+                              "
+                              [maxLength]="field.maxLength"
+                              (blurEvent)="onBlurEvent($event,field)"
+                              #focusableCell
+                            >
+                            </acty-textinput>
                           }
                         }
                       </div>
@@ -434,11 +862,9 @@
       }
     </div>
   </form>
-  }
-  
-  <!-- Custom Sticky Date Picker (Translated to Material) -->
-  @if(isMaterialFilter() && isCheckBoxAdded()){
-    <div [ngClass]="!(selectedDateField() && selectedDateField().length > 0) ? 'disableDatePicker' : ''" class="sticky-date-picker">
+}
+@if(isMaterialFilter() && isCheckBoxAdded()){
+<div [ngClass]="!(selectedDateField() && selectedDateField().length > 0) ? 'disableDatePicker' : ''" class="sticky-date-picker">
       <div class="datePickercontent">
         <div class="content-heading">
           <div class="content-title">
@@ -454,34 +880,21 @@
               @for(field of datePickerFields; track field){
                 <div class="child">
                   <label class="child-label">{{ "TASK.Search." + field.label | translate }} :</label>
-                  
-                  <mat-form-field appearance="outline" class="date-input-dropdown">
-                    <mat-select 
-                      [formControlName]="field.condition"
-                      (selectionChange)="onDateConditionUpdated($event.value, field)" 
-                      (focusout)="conditionFocusOut(field)">
-                      @for(cond of getDateConditions(); track cond.Id) {
-                        <mat-option [value]="cond.Id">{{ cond.text }}</mat-option>
-                      }
-                    </mat-select>
-                  </mat-form-field>
-                  
-                  <mat-form-field appearance="outline" class="number-input">
-                    <input matInput type="number"
-                      [formControlName]="field.dataField"
-                      [min]="field.min"
-                      [max]="field.max"
-                      (focusout)="applyDate(field.label)" />
-                    @if(getHint(field.label)) {
-                       <mat-error>{{ getHint(field.label)?.message | translate }}</mat-error>
-                    }
-                  </mat-form-field>
-                </div>
-              }
-            </div>
+            <acty-dropdown [dataSource]="getDateConditions()" displayExpr="text" valueExpr="Id" [isNullable]="false"
+              [isSearch]="false" [selectedValue]="datePickerForm.get(field.condition)?.value"
+              (selectionChange)="onDateConditionUpdated($event, field)" (focusout)="conditionFocusOut(field)" class="date-input-dropdown">
+            </acty-dropdown>
+            <acty-numberinput [required]="false" [isDisabled]="false" [minValue]="field.min" [maxValue]="field.max" [isDefaultZero]="false"
+              [formControlName]="field.dataField" class="number-input" (focusout)="applyDate(field.label)" [dataScale]="0"
+              [isDisabled]="datePickerForm && datePickerForm.get(field.condition)?.value == 2" [hint]="getHint(field.label)"
+            >
+            </acty-numberinput>
+          </div>
           }
-        }
-      </div>
+        </div>
+      }
+    }
     </div>
-  }
+</div>
+}
 </div>

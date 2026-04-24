@@ -1,0 +1,21 @@
+/* Container for each row */
+.acty-Selector-Container {
+  display: flex;
+  align-items: center;
+  margin: var(--theme-spacing-medium);
+  gap: var(--theme-spacing-small-medium);
+}
+
+.sort-data-Dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--theme-spacing-small);
+  padding: var(--theme-spacing-small);
+}
+
+/* Label styling */
+.display-label {
+  display: inline-block;
+  white-space: nowrap;
+  width: 80px;
+}

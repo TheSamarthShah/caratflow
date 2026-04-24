@@ -1,0 +1,89 @@
+@if (isVisible()) {
+<ng-container class="parent">
+  <mat-form-field
+    subscriptSizing="dynamic"
+    [appearance]="appearance()"
+    [floatLabel]="floatLabel()"
+    [style]="style()"
+    class="text-input-field acty-text-input"
+    [class.disabled]="isDisabled()"
+  >
+    @if (label()) {
+    <mat-label>{{ label() }}</mat-label>
+    }
+    <input
+      #inputRef
+      matInput
+      [type]="type() === 'password' ? (hide() ? 'password' : 'text') : type()"
+      [placeholder]="placeholder()"
+      class="custom-form-field"
+      [required]="required()"
+      [matTooltip]="type() === 'password' ? null : formField.value"
+      [readonly]="readonly() || isDisabled() || !isEditable()"
+      [formControl]="formField"
+      (blur)="onInputBlur()"
+      [attr.maxlength]="maxLength()"
+      actyShowTooltipIfTruncated
+    />
+
+    <!-- Input button content with matPrefix -->
+    @if(hasPrefix()) {
+      <div matPrefix class="prefix-content-container">
+        <ng-content select="[prefix-content]"></ng-content>
+      </div>
+    }
+
+    <!-- Input button content with matSuffix -->
+    <div matSuffix class="suffix-buttons-container">
+      <ng-content select="[suffix-button]"></ng-content>
+
+      @if (type() === 'password') {
+        <acty-button 
+          [type]="'icon'" 
+          [leftIcon]="hide() ? 'visibility_off' : 'visibility'" 
+          (click)="togglePasswordVisibility()" 
+          [tabIndex]="focusSuffixButton() ? 0 : -1"
+        />
+      }
+
+      @if (value() && isNullable()) {
+      <acty-button [type]="'icon'" leftIcon="close" (click)="clearValue($event)" />
+      }
+    </div>
+
+    @if (type() == 'email') {
+    <div>
+      @if (formField.hasError('email') && !formField.hasError('required()')) {
+      <mat-error>Please enter a valid email address</mat-error>
+      } @if (formField.hasError('required') && required()) {
+      <mat-error>This field is <strong>required</strong></mat-error>
+      }
+    </div>
+    } @if (type() == 'text') {
+    <div>
+      @if (formField.hasError('required') && required()) {
+      <mat-error>This field is <strong>required</strong></mat-error>
+      }
+    </div>
+    }
+  </mat-form-field>
+  <div class="text-input-hint acty-text-input-hint" [style]="style()">
+    @if (hint() && hint()?.message) {
+    <mat-hint [class]="'acty-text-input-' + getHintType()">
+      <div class="hint-container">
+        <div>
+          <mat-icon>{{ getHintIcon() }}</mat-icon>
+        </div>
+        <span
+          [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+          [matTooltipClass]="'acty-tooltip-' + getHintType()"
+          actyShowTooltipIfTruncated
+        >
+          {{ hint()?.message ?? "" | translate : hint()?.params }}
+        </span>
+      </div>
+    </mat-hint>
+    }
+  </div>
+</ng-container>
+}

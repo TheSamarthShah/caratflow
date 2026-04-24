@@ -1,0 +1,26 @@
+<div class="tabcontrol acty-tabcontrol">
+  <!-- Header -->
+  <div class="tab-header acty-tab-header">
+     <div class="tab-header-items">
+    @for (tab of visibleTabs; track $index; let i = $index) {
+    <div
+      class="tab-header-item acty-tab-header-item"
+      [class.active]="activeIndex === i"
+      [class.disabled]="tab.disabled"
+      (click)="selectTab(i)">
+      {{ tab.label | translate }}
+    </div>
+  }
+  </div>
+    
+      <div class="tab-header-extra-slot">
+        <ng-content select="[tab-header-extra]"></ng-content>
+      </div>
+  </div>
+
+
+  <!-- Content -->
+  <div class="tab-content acty-tab-content">
+    <ng-content select=".acty-tab"></ng-content>
+  </div>
+</div>

@@ -6,32 +6,45 @@
 .group-container {
   display: flex;
   flex-direction: column;
+  // border: 1px solid var(--theme-border);
   min-width: 100%;
   width: max-content;
 
+  /* Each row holds multiple groups */
   .group-row {
     display: flex;
+    // flex-wrap: wrap;
+    /* allows groups to wrap only if space is small */
     border: 1px solid var(--theme-border);
     align-items: flex-start;
     background-color: var(--theme-base);
+    //Key changes: Shrink to content, no screen stretching
     min-width: 100%;
     width: max-content;
     box-sizing: border-box; 
 
-    .equal-group-create {
-      flex: 0 0 calc(50% - (var(--theme-spacing-small-plus)/2)); 
+    //for material filter only
+    //It is implemented whenever the material filter is applied.
+    .equal-group-create{
+      // width: 50%;
+      // flex : 1;
+      flex: 0 0 calc(50% - (var(--theme-spacing-small-plus)/2)); // 8px = half your gap value
     }
-    
+    /* Each group block (Group 1, Group 2, etc.) */
     .tabular-grid-tabColumn {
+      /* auto width balancing */
       box-sizing: border-box;
       transition: all 0.3s ease;
 
+      /* Fields inside group */
       .group-section {
         display: flex;
         flex-wrap: wrap;
         width: 100%;
 
-        .full-width-group-contain {
+        //for material filter only
+        //It is implemented whenever the material filter is applied.
+        .full-width-group-contain{
           width : 100%;
         }
         
@@ -61,27 +74,51 @@
             border-left: 1px solid var(--theme-border);
           }
 
-          .field-value-full-width {
+         //for material filter only
+          //It is implemented whenever the material filter is applied.
+          .field-value-full-width{
             width: 100%;
             display: flex;
           }
-          
           .field-value {
-            /* Applying styles to standard Material wrappers instead of custom acty inputs */
             ::ng-deep .updatedCell {
-              .mdc-text-field--outlined, 
-              .mdc-checkbox__background, 
-              .mdc-radio__outer-circle {
-                background-color: var(--theme-success-light) !important;
+              .acty-text-input,
+              .acty-datetime-field,
+              .acty-dropdowm-field,
+              .number-input-field,
+              .acty-checkbox,
+              .acty-radiobutton-container,
+              .acty-textarea {
+                background-color: var(--theme-success-light);
               }
             }
 
-            ::ng-deep .validate-column,
+            ::ng-deep .validate-column {
+              .acty-text-input,
+              .acty-datetime-field,
+              .acty-dropdowm-field,
+              .number-input-field,
+              .acty-checkbox,
+              .acty-radiobutton-container,
+              .acty-textarea {
+                background-color: var(--theme-danger-light);
+
+                .acty-hint-container {
+                  background-color: var(--theme-base);
+                }
+              }
+
+              .acty-checkbox-container {
+                justify-content: start;
+              }
+            }
+
             ::ng-deep .entry-require-column {
-              .mdc-text-field--outlined, 
-              .mdc-checkbox__background, 
-              .mdc-radio__outer-circle {
-                background-color: var(--theme-danger-light) !important;
+              .acty-text-input,
+              .acty-datetime-field,
+              .acty-dropdowm-field,
+              .acty-textarea {
+                background-color: var(--theme-danger-light);
               }
             }
 
@@ -97,10 +134,19 @@
 
               &.textarea-readonly {
                 display: block;
+                //it is breaking design of form component
+                // line-height: 1.5;
                 min-height: auto;
                 white-space: pre-wrap;
               }
             }
+          }
+
+          .header-label {
+            line-height: var(--theme-elements-container-height);
+            min-height: var(--theme-elements-container-height);
+            padding-left: var(--theme-spacing-small);
+            white-space: nowrap;
           }
         }
       }
@@ -109,20 +155,18 @@
    .input-row-container {
       display: flex;
       flex-direction: row;
-      align-items: center;  
+      align-items: flex-start;  
       gap: var(--theme-spacing-small-plus);             
       width: 100%;
-      
-      /* Target the Angular Material mat-form-field internal padding adjustment */
-      mat-form-field {
-        margin-bottom: -1.25em; /* Compensate for standard Material padding */
-      }
 
-      .conditionDropdownWrapper {
+      .conditionDropdownWrapper{
         width: var(--theme-samll-input-box-width);
       }
+      //for material filter only
+      //It is implemented whenever the material filter is applied.
     }
-    .component-full-width {
+    .component-full-width{
+      //To calculate the width: The total width of 100% is divided into two parts. From 50% of the total width, subtract the width of the dropdown (180px), and then add a gap of 8px.
       width: calc(100% / 2 - ((var(--theme-samll-input-box-width)/2) + var(--theme-spacing-small-plus)));
       min-width: 250px;
     }
@@ -134,39 +178,38 @@
   margin-left: var(--theme-spacing-xsmall);
 }
 
-.datePickercontent {
+.datePickercontent{
   display: flex;
   z-index: 107 !important;
   position: relative;
   flex-direction: column;
   background: var(--theme-interactive-hover);
   padding: var(--theme-spacing-small);
-  .content-heading {
+  .content-heading{
     display: flex;
     justify-content: space-between;
-    .content-title {
+    .content-title{
       display: flex;
       gap: 1rem;
       padding-bottom: var(--theme-spacing-small);
     }
   }
-  .content {
+  .content{
     display: flex;
+    // gap: 2rem;
     justify-content: space-between;
     .child {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       gap: var(--theme-spacing-xsmall);
       font-size: var(--theme-medium-font-size);
-      
-      .date-input-dropdown {
+      .date-input-dropdown{
         width: 150px;
-        margin-bottom: -1.25em;
       }
-      .number-input {
+      .number-input{
         width: var(--theme-xsamll-input-box-width);
-        margin-bottom: -1.25em;
       }
+
       .child-label {
         text-wrap-mode: nowrap;
         margin-right: var(--theme-spacing-small);
@@ -189,6 +232,7 @@
   position: sticky;
   bottom: 0;
   background: var(--theme-interactive-hover);
-  z-index: 107; 
+  z-index: 107; /* keep it above form rows */
   border-top: 1px solid var(--theme-border);
+  //padding: var(--theme-spacing-small);
 }

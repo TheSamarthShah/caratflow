@@ -1,0 +1,52 @@
+<div [class]="disabled()? 'disabled-multiselect ' : '' + severity() + '-multiselect'">
+<acty-button
+  type="outlined"
+  [text]="fixedPlaceholder() ? ((fixedPlaceholder() | translate) ?? '') : getSelectedText() ? getSelectedText() : ''"
+  [leftIcon]="leftIcon()"
+  [rightIcon]="'keyboard_arrow_down'"
+  [disabled]="disabled()"
+  [severity]="'primary'"
+  [ngClass]="styleClass()"
+  [matMenuTriggerFor]="optionsMenu"
+/>
+
+<mat-menu #optionsMenu="matMenu" class="multiselect-menu">
+  @if(filter() || showToggleAll()){
+  <div class="multiselect-header">
+    @if(showToggleAll()){
+    <div (click)="$event.stopPropagation()">
+    <acty-check-box [isChecked]="isAllSelected()" (click)="toggleAllSelection()"></acty-check-box>
+    </div>
+    } @if(filter()){
+    <div
+      (click)="$event.stopPropagation()"
+      [style.padding-left]="showToggleAll() ? '0px' : '8px'"
+    >
+      <acty-textinput [(ngModel)]="filterValue">
+        <mat-icon suffix-button class="search-icon">search</mat-icon>
+      </acty-textinput>
+    </div>
+    }
+  </div>
+  }
+  <div
+    [style.max-height]="scrollHeight()"
+    class="multiselect-options"
+  >
+    @if(filteredOptions().length > 0){ @for (option of filteredOptions(); track
+    $index) {
+    <div (click)="$event.stopPropagation()" class="multiselect-option">
+      <div class="multiselect-option-checkbox">
+        <acty-check-box
+          [isChecked]="internalValue().includes(option.key)"
+          (click)="toggleOption(option.key)"
+          [label]="option.label | translate"
+        ></acty-check-box>
+      </div>
+    </div>
+    } } @else {
+    <div class="multiselect-nodata">No Results Found</div>
+    }
+  </div>
+</mat-menu>
+</div>

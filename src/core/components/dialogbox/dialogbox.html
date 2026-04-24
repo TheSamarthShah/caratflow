@@ -1,0 +1,94 @@
+@if (isDialogVisible()) {
+<div class="dialog-overlay" [class.blocking]="!backgroundAccess() && isDialogRendered" [class.non-blocking]="backgroundAccess() || !isDialogRendered" [ngClass]="position()">
+  <div #dialogBox  class="dialog-box acty-dialog-box"       
+       [ngClass]="type()"
+       cdkDrag
+       [cdkDragDisabled]="!isDraggable() && !isDraggableFromBody()"
+       cdkDragBoundary=".dialog-overlay"
+       [ngStyle]="getDialogStyles()">
+
+       
+  <!-- Resize handles -->
+  <div *ngIf="isResizable()" class="resize-handle top" (mousedown)="$event.stopPropagation(); initResize($event, 'top')"></div>
+  <div *ngIf="isResizable()" class="resize-handle bottom" (mousedown)="$event.stopPropagation(); initResize($event, 'bottom')"></div>
+  <div *ngIf="isResizable()" class="resize-handle left" (mousedown)="$event.stopPropagation(); initResize($event, 'left')"></div>
+  <div *ngIf="isResizable()" class="resize-handle right" (mousedown)="$event.stopPropagation(); initResize($event, 'right')"></div>
+
+  <!-- Corners -->
+  <div *ngIf="isResizable()" class="resize-handle top-left" (mousedown)="$event.stopPropagation(); initResize($event, 'top-left')"></div>
+  <div *ngIf="isResizable()" class="resize-handle top-right" (mousedown)="$event.stopPropagation(); initResize($event, 'top-right')"></div>
+  <div *ngIf="isResizable()" class="resize-handle bottom-left" (mousedown)="$event.stopPropagation(); initResize($event, 'bottom-left')"></div>
+  <div *ngIf="isResizable()" class="resize-handle bottom-right" (mousedown)="$event.stopPropagation(); initResize($event, 'bottom-right')"></div>
+    
+    <!-- Header -->
+    <div class="dialog-header acty-dialog-header"
+      [class.cdk-drag-handle]="isDraggable()"
+      (mousedown)="!isDraggable() && $event.stopPropagation()"
+      (touchstart)="!isDraggable() && $event.stopPropagation()" [class.no-padding]="!showTitle()" >
+
+      <div class="header-top">
+        @if (showTitle()) {
+          <span class="dialog-title" [ngStyle]="{ 'color': titleColor() }">
+            {{ title()! | translate }}
+          </span>
+        }   
+      
+        @if (showClose()) {
+          <acty-button
+            type="icon-outlined"
+            [leftIcon]="'close'"
+            [severity]="'danger'"
+            [btnClass]="'close-btn'"
+            (clicked)="onClose()">
+          </acty-button>
+        }
+      </div>
+
+      <div class="header-extra">
+        <ng-content select="[dialog-header]"></ng-content>
+      </div>          
+      
+    </div>
+
+    <!-- Body -->
+    <div class="dialog-body acty-dialog-body"
+      [class.cdk-drag-handle]="isDraggableFromBody()"
+      (mousedown)="!isDraggableFromBody() && $event.stopPropagation()"
+      (touchstart)="!isDraggableFromBody() && $event.stopPropagation()">
+      @if (showIcon()) {
+        <mat-icon class="dialog-icon acty-dialog-icon" [ngStyle]="{ 'color': iconColor() }">{{ iconName() }}</mat-icon> 
+      }
+
+      @if (message()) {
+        <span class="dialog-message acty-dialog-message" [ngStyle]="{ 'color': messageColor() }">
+          {{ message() }}
+        </span> 
+      }    
+      
+       <ng-content></ng-content>
+    
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer acty-dialog-footer" [class.no-padding]="!showFooterButton()" [ngStyle]="{'text-align': buttonPosition()}">
+
+      <ng-content select="[dialog-footer]"></ng-content>
+       
+      @if(showFooterButton()){
+        @for (btn of buttons(); track btn.text) {
+           <acty-button class="dialog-button"
+            [type]="btn.type || 'filled'"
+            [severity]="btn.severity || 'primary'"
+            [text]="btn.text"
+            [leftIcon]="btn.leftIcon"
+            [rightIcon]="btn.rightIcon"
+            [btnClass]="btn.btnClass"
+            [disabled]="btn.disabled"
+            (clicked)="onButtonClick(btn)">
+          </acty-button>
+      }
+    }
+    </div>
+  </div>
+</div>
+}

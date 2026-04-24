@@ -1,0 +1,23 @@
+<div class="menu-button acty-menu-button" [class]="disabled()? 'disabled-btn ' : '' + severity() + '-btn'">
+<acty-button
+  type="outlined"
+  [text]="text() | translate"
+  [leftIcon]="leftIcon()"
+  [rightIcon]="rightIcon()"
+  [disabled]="disabled()"
+  severity="primary"
+  (clicked)="clicked.emit()"
+  [matMenuTriggerFor]="menu"
+/>
+
+<mat-menu #menu="matMenu" class="menu-button-menu-panel acty-menu-button-menu">
+  @for(item of menuItems(); track $index){
+    <button mat-menu-item (click)="menuClicked.emit(item)" class="menu-button-menu-item acty-menu-button-menu-item">
+      @if (item.icon) {
+        <mat-icon class="acty-menu-button-menu-item-icon">{{ item.icon }}</mat-icon>
+      }
+      <span class="acty-menu-button-menu-item-text">{{ item.label | translate}}</span>
+    </button>
+  }
+</mat-menu>
+</div>

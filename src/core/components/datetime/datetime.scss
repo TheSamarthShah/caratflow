@@ -1,0 +1,120 @@
+@use "@angular/material" as mat;
+
+.datetime-field {
+  background-color: var(--theme-base);
+  border-radius: var(--theme-form-field-border-radius);
+
+  /* Disabled state styling */
+  &.disabled {
+    opacity: 0.6;
+    /* visually faded */
+    pointer-events: none;
+    /* prevent clicks */
+  }
+  input {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  width: 100%;
+}
+
+.datetime-popup {
+  z-index: 1000;
+  /* above other elements */
+  background: var(--theme-surface-50);
+  /* use theme background */
+  box-shadow: 0px 3px 12px rgba(var(--theme-shadow-color));
+  width: var(--theme-datetime-popup-width);
+
+  /* Time selector row */
+  .time-selectors {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner-label-group {
+    //removes default focus outline
+    outline: none; 
+  }
+
+    .spinner-label-group:focus {
+      outline: none;
+    }
+    //Apply style to inner div when outer is focused
+    .spinner-label-group:focus .spinner-inner {
+      border: 1px solid var(--theme-interactive-active-secondary);
+    }
+
+  /* Action buttons row */
+  .popup-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--theme-spacing-small);
+
+    button {
+      min-width: var(--theme-height-width-xlarge);
+      border-radius: 0px;
+      margin: 3%;
+      background-color: var(--theme-base);
+    }
+  }
+}
+
+.time-selectors {
+  span {
+    font-weight: bolder;
+  }
+}
+
+.spinner-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.datetime-hint {
+  cursor: default;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-line;
+  text-wrap-mode: nowrap;
+  mat-hint{
+    display: flex;
+  }
+  .hint-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    span {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+  }
+
+  // Define your message types and their corresponding colors
+  $message-types: (
+    "error": var(--theme-danger),
+    "success": var(--theme-success),
+    "warning": var(--theme-warn),
+    "info": var(--theme-info),
+  );
+
+  // Loop over each type to generate the CSS
+  @each $type, $color in $message-types {
+    // This will create .acty-text-input-error, .acty-text-input-success, etc.
+    .acty-datetime-#{$type} {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: $color;
+      @include mat.icon-overrides(
+        (
+          color: currentColor,
+        )
+      );
+    }
+  }
+}

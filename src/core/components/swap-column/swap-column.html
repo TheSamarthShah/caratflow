@@ -1,0 +1,87 @@
+<acty-dialog-box
+    #dialogComponent
+    class="swapColumn-dialog-box"
+    [title]="'CORE.SWAPCOLUMN.DIALOG_TITLE' | translate"   
+    [showTitle]="true"
+    [showFooterButton]="true"
+    [buttons]="buttons"   
+    [showClose]="true"
+    [showIcon]="false"
+    [buttonPosition]="'center'"
+    [isDraggable]="true"
+    [width]="'40%'"
+    [height]="'60%'"
+    (dialogResult)="handleDialogResult($event)"
+    (dialogClosed)="onCloseDialog($event)"
+    >
+
+  <!-- Container for the entire component -->
+  <div class="dialog-container">
+
+    <!-- Scrollable Table -->
+    <div class="table-scroll-wrapper" cdkScrollable>
+      <mat-table
+        #table
+        [dataSource]="gridColumnList2()"
+        class="tables-container"
+        matSort
+        cdkDropList
+        (cdkDropListDropped)="dropTable($event)"
+        cdkDropListData="gridColumnList2()"
+      >
+
+        <!-- Drag Handle Column -->
+        <ng-container matColumnDef="drag">
+          <mat-header-cell *matHeaderCellDef></mat-header-cell>
+          <mat-cell *matCellDef="let rowData">
+            <mat-icon class="drag-handle" cdkDragHandle>reorder</mat-icon>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Column Name -->
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef class="leftborder">
+            {{ 'CORE.SWAPCOLUMN.HEADER_COLUMN' | translate }}
+          </mat-header-cell>
+          <mat-cell *matCellDef="let rowData" class="leftborder">
+            <span class="cell-text" actyShowTooltipIfTruncated [matTooltip]="rowData._DISPLAYNAME | translate">{{ rowData._DISPLAYNAME | translate }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Visible Checkbox -->
+        <ng-container matColumnDef="visible">
+          <mat-header-cell *matHeaderCellDef class="leftborder">
+            {{ 'CORE.SWAPCOLUMN.HEADER_Display' | translate }}
+          </mat-header-cell>
+          <mat-cell *matCellDef="let rowData" class="leftborder">
+            <acty-check-box
+              [(ngModel)]="rowData._VISIBLE"
+              (change)="rowData.VISIBLE = $event ? '1' : '0'; rowData._VISIBLE = $event"
+            ></acty-check-box>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Fixed Checkbox -->
+        <ng-container matColumnDef="fixed">
+          <mat-header-cell *matHeaderCellDef class="leftborder">
+            {{ 'CORE.SWAPCOLUMN.HEADER_FIXED_COLUMNS' | translate }}
+          </mat-header-cell>
+          <mat-cell *matCellDef="let rowData" class="leftborder">
+            <acty-check-box
+              [(ngModel)]="rowData._FROZEN"
+              (change)="rowData.frozen = $event ? '1' : '0'; rowData._FROZEN = $event; syncFrozenRows(rowData)"
+            ></acty-check-box>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Header & Row Definitions -->
+        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+        <mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          cdkDrag
+          [cdkDragData]="row"
+        ></mat-row>
+      </mat-table>
+    </div>
+  </div>
+</acty-dialog-box>

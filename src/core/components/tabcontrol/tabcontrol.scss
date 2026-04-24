@@ -1,0 +1,47 @@
+.tabcontrol {
+  display: flex;
+  flex-direction: column;
+  //border: 1px solid var(--theme-surface);
+  height: 100%;
+
+  .tab-header {
+    flex-shrink: 0;  
+    display: flex;
+    background: var(--theme-base);
+    border-bottom: 1px solid var(--theme-surface);
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    .tab-header-items {
+      display: flex;
+    }
+
+    .tab-header-item {
+      padding: var(--theme-spacing-small-medium) 16px;
+      cursor: pointer;
+      user-select: none;
+
+      &.active {
+        color: var(--theme-info);
+        border-bottom: 1px solid var(--theme-primary);
+      }
+
+      &.disabled {
+        color: var( --theme-readonly-text-color);
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .tab-content {
+    flex: 1;
+    overflow-y: hidden;
+    display: contents;
+  }
+}
+ 
+.tab-header-extra-slot {
+  margin: var(--theme-spacing-small)
+}

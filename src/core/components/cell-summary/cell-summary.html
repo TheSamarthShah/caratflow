@@ -1,0 +1,75 @@
+<div>
+  <!-- <acty-multiselect
+    [options]="computedValues"
+    [maxSelectedLabels]="3"
+    fixedPlaceholder="CORE.CELLSUMMARY.CellSummaryBtn"
+    [filter]="false"
+    [leftIcon]="'functions'"
+    [showToggleAll]="false"
+    [(value)]="selectedCategories"
+    [value]="'2,3,4,5,6,7'"
+    [severity]="'primary'"
+    (valueChange)="onCategoryChange($event)"
+  >
+  </acty-multiselect> -->
+
+  <acty-dialog-box
+    #dialog
+    [backgroundAccess]="true"
+    [title]="''"
+    [showTitle]="false"
+    [showFooterButton]="false"
+    [showIcon]="false"
+    [buttonPosition]="'right'"
+    [isDraggable]="false"
+    [isDraggableFromBody]="true"
+    [width]="'auto'"
+    [height]="'20px'"
+    [position]="'bottom'"
+    [setCellSummaryPosition]="setCellSummaryPosition()"
+  >
+    @if(selectionCount() > 1) {
+
+    <div
+      class="summary-dialog-body"
+    >
+      @if (selectedCategories()?.includes('2') && DisplaySelectedCellData().col1) {
+      <div>
+        {{ "CORE.CELLSUMMARY.Average" | translate }}:
+        {{ DisplaySelectedCellData().col1 }}
+      </div>
+      } @if ( selectedCategories()?.includes('3') &&DisplaySelectedCellData().col2)
+      {
+      <div>
+        {{ "CORE.CELLSUMMARY.NumberOfData" | translate }}:
+        {{ DisplaySelectedCellData().col2 }}
+      </div>
+      } @if (selectedCategories()?.includes('4') &&DisplaySelectedCellData().col3)
+      {
+      <div>
+        {{ "CORE.CELLSUMMARY.NumberOfValue" | translate }}:
+        {{ DisplaySelectedCellData().col3 }}
+      </div>
+      } @if ( selectedCategories()?.includes('5') &&
+      DisplaySelectedCellData().col4) {
+      <div>
+        {{ "CORE.CELLSUMMARY.Minimum" | translate }}:
+        {{ DisplaySelectedCellData().col4 }}
+      </div>
+      } @if ( selectedCategories()?.includes('6') &&
+      DisplaySelectedCellData().col5) {
+      <div>
+        {{ "CORE.CELLSUMMARY.Maximum" | translate }}:
+        {{ DisplaySelectedCellData().col5 }}
+      </div>
+      } @if ( selectedCategories()?.includes('7') &&
+      DisplaySelectedCellData().col6) {
+      <div>
+        {{ "CORE.CELLSUMMARY.Total" | translate }}:
+        {{ DisplaySelectedCellData().col6 }}
+      </div>
+      }
+    </div>
+    }
+  </acty-dialog-box>
+</div>

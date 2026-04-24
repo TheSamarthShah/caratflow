@@ -1,0 +1,69 @@
+@use "@angular/material" as mat;
+.textarea {
+
+  .textarea-input {
+    //padding: var(--theme-spacing-small);
+    //border-radius: var(--theme-form-field-border-radius);
+    resize: vertical;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    line-height: var(--theme-height-width-medium);
+    &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  }
+}
+
+.textarea-error {
+  color: var(--theme-danger);
+  font-size: var(--theme-medium-font-size);
+  margin-top: var(--theme-spacing-small);
+}
+
+.textarea-hint {
+  cursor: default;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre-line;
+  text-wrap-mode: nowrap;
+  mat-hint {
+    display: flex;
+  }
+  .hint-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    span {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
+    }
+  }
+
+  // Define your message types and their corresponding colors
+  $message-types: (
+    "error": var(--theme-danger),
+    "success": var(--theme-success),
+    "warning": var(--theme-warn),
+    "info": var(--theme-info),
+  );
+
+  // Loop over each type to generate the CSS
+  @each $type, $color in $message-types {
+    // This will create .acty-text-input-error, .acty-text-input-success, etc.
+    .acty-textarea-#{$type} {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: $color;
+      @include mat.icon-overrides(
+        (
+          color: currentColor,
+        )
+      );
+    }
+  }
+}

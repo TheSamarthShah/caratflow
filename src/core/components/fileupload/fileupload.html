@@ -1,0 +1,72 @@
+<div class="mainDiv file-upload">
+  <div class="buttonDiv file-upload-buttons">
+    <acty-button
+      text="Choose"
+      type="filled"
+      leftIcon="add_2"
+      severity="primary"
+      [disabled]="readonly()"
+      (click)="fileInput.click()"
+      class="file-upload-choose-button"
+    />
+    <input
+      type="file"
+      #fileInput
+      multiple
+      hidden
+      (change)="onFileSelect($event)"
+    />
+  </div>
+
+  <mat-divider class="divider file-upload-divider"></mat-divider>
+
+  <div
+    class="dragdropblock file-upload-drag-drop-block"
+    (dragover)="onDragOver($event)"
+    (drop)="onFileDropped($event)"
+  >
+    @if(getVisibleFiles().length > 0){
+    <ul class="file-list file-upload-files">
+      @for(file of filesArr; track file.id; let i = $index){ @if(!file.deleted){
+      <li class="file-upload-item">
+        <div class="file-row file-upload-file-row">
+          <div class="file-info file-upload-file-info">
+            <mat-icon class="file-icon file-upload-file-icon">{{
+              file.isDBSaved ? "download_done" : "upload"
+            }}</mat-icon>
+            <div class="file-upload-file-desc">
+              <div class="file-name file-uplaod-file-name" (click)="previewFile(file)">
+                {{ file.name }}
+              </div>
+              <div class="desc-row file-upload-desc-row">
+                <div class="file-size file-upload-file-size">
+                  Size: {{ file.file?.size | number : "1.0-0" }} KB
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="right-buttons file-upload-right-buttons">
+            <acty-button
+              (click)="downloadFile(file)"
+              type="icon"
+              leftIcon="download"
+              class="file-upload-download-button"
+            />
+            <acty-button
+              (click)="removeFile(filesArr.indexOf(file))"
+              type="icon"
+              [leftIcon]="file.isDBSaved ? 'delete' : 'close'"
+              severity="danger"
+              [disabled]="readonly()"
+              class="file-upload-delete-button"
+            />
+          </div>
+        </div>
+      </li>
+      } }
+    </ul>
+    } @else {
+    <div class="no-files file-upload-no-files">Drag and drop files here to upload.</div>
+    }
+  </div>
+</div>

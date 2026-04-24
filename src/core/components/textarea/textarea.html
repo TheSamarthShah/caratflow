@@ -1,0 +1,51 @@
+<div class="textarea" [style]="style()">
+  
+  <mat-form-field
+    subscriptSizing="dynamic"
+    appearance="outline"
+    class="acty-textarea-field acty-textarea"
+    [class.disabled]="isDisabled()"
+    [style]="style()"
+  >
+    <textarea
+      matInput
+      class="textarea-input acty-textarea-input"
+      [(ngModel)]="value"
+      [placeholder]="placeholder()"
+      [required]="required()"
+      [matTooltip]="value"
+      [rows]="rows()"
+      [cols]="columns()"
+      [style.resize]="allowResize() ? 'vertical' : 'none'"
+      (input)="onInput($event)"
+      spellcheck="false"
+      [readonly]="isDisabled()"
+      [disabled]="isDisabled()"
+      [attr.maxlength]="maxLength()"
+      actyShowTooltipIfTruncated
+    ></textarea>
+  </mat-form-field>
+
+  @if (required() && !value) {
+    <div class="textarea-error acty-textarea-error">This field is required.</div>
+  }
+
+  <div class="textarea-hint acty-textarea-hint">
+    @if (hint() && hint()?.message) {
+    <mat-hint [class]="'acty-textarea-' + getHintType()">
+      <div class="hint-container">
+        <div>
+          <mat-icon>{{ getHintIcon() }}</mat-icon>
+        </div>
+        <span
+          [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+          [matTooltipClass]="'acty-tooltip-' + getHintType()"
+          actyShowTooltipIfTruncated
+        >
+          {{ hint()?.message ?? "" | translate : hint()?.params }}
+        </span>
+      </div>
+    </mat-hint>
+    }
+  </div>
+</div>

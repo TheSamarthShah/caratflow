@@ -1,0 +1,49 @@
+@use "@angular/material" as mat;
+.dialog-content-wrapper {  
+  max-width: 30vw;          
+  max-height: 25vh;  
+  min-width: var(--theme-small-card-width);     
+  overflow-y: auto;         
+  padding: calc(var(--theme-spacing-large) + var(--theme-spacing-xsmall));
+  box-sizing: border-box;
+  word-wrap: break-word;
+
+  .message-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--theme-spacing-small-plus); 
+      .check_circle { color:var( --theme-success); }
+      .cancel   { color: var(--theme-danger );}
+      .warning { color: var(--theme-warn); }
+      .info    { color:  var(--theme-info); }
+      .help   {color:var(--theme-help);}
+     .message-content {
+        white-space: pre-line; 
+        word-wrap: break-word;
+        overflow-wrap: break-word;  
+        font-size: var(--theme-medium-font-size);
+        flex: 1; 
+        width: 93%;
+      }
+      
+      .warning_icon{      
+        @include mat.icon-overrides(
+          (
+            color: var(--theme-warn),
+          )
+        );
+      }
+  }
+}
+
+.footer-buttons{
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--theme-spacing-small);
+    gap: var(--theme-spacing-small);
+}
+
+
+
+
+

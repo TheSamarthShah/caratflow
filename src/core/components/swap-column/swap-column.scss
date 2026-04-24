@@ -1,0 +1,90 @@
+@use '@angular/material' as mat;
+.swapColumn-dialog-box{
+  ::ng-deep{
+    .dialog-header{
+      background-color: var(--theme-surface-50);
+    }
+    .dialog-body{
+      background-color: var(--theme-base);
+    }
+  }
+}
+.dialog-container {
+  @include mat.table-overrides((
+    row-item-outline-color: var(--theme-border),
+    header-headline-size: var(--theme-small-font-size),
+    header-container-height: var(--theme-elements-container-height),
+    row-item-container-height : var(--theme-elements-container-height),
+  ));
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  //padding: var(--theme-spacing-small);
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .table-scroll-wrapper {
+    flex: 0 1 auto;
+    overflow-y: auto;
+    max-height: 800px;
+    overflow-x: auto;
+    position: relative;
+
+    .mat-column-drag {
+      flex: 0 0 80px;
+      padding: 0;
+      max-width: 80px;
+      display: flex;
+      justify-content: center;
+    }
+    .mat-column-name {
+      flex: 1 1 auto;
+      min-width: 200px;
+    }
+    .mat-column-visible,
+    .mat-column-fixed {
+      flex: 0 0 120px;
+      padding: 0;
+      max-width: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .tables-container {
+      width: 100%;
+      border: 1px solid var(--theme-border);
+      //table-layout: auto;
+      white-space: nowrap;
+      box-sizing: border-box;
+      border-collapse: collapse;
+      background-color: var(--theme-base);
+    }
+
+    .drag-handle {
+      cursor: move;
+    }
+
+    .leftborder {
+      border-left: 1px solid var(--theme-border);
+      overflow: hidden; // Ensure cell hides overflow
+      
+      .cell-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        width: 100%;
+      }
+    }
+  }
+
+  .footer-buttons {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+  }
+}

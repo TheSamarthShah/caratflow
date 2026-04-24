@@ -1,0 +1,321 @@
+@use "@angular/material" as mat;
+
+:root {
+  // add shades using numbers. Eg. if lighter than main then use number lower than 500 else higer number. Refer surface.
+  --theme-primary: #2563eb;
+  --theme-secondary: #e2e8f0;
+  --theme-surface: #c4c4c6;
+  --theme-surface-100: #ecebeb;
+  --theme-surface-50: #f5f5f5;
+  --theme-surface-10: #f9fafb;
+  --theme-success: #16a34a;
+  --theme-success-light: #e4f5d4;
+  --theme-info: #0284c7;
+  --theme-info-light: #17a2b8;
+  --theme-warn: #ea580c;
+  --theme-warn-light: #ffc107;
+  --theme-help: #9333ea;
+  --theme-danger: #dc2626;
+  --theme-danger-light: #ff7f7f;
+  --theme-base: #ffffff;
+  --theme-inverse: #3a3838;
+  --theme-interactive-active: #c4ddfc;
+  --theme-interactive-hover: #dbf0ff;
+  --theme-border: #e8e8e8;
+  --theme-border-100: #dddddd;
+  --theme-readonly-text-color: grey;
+  --theme-required-field-label: #fde8e8;
+  --theme-interactive-active-secondary: #6a98fa;
+  //--theme-readonly-text-color: #059669;
+  --theme-interactive-hover-rgb: 219, 240, 255;
+  --theme-overlay-rgb: 0, 0, 0, 0.2;
+  --theme-shadow-color: 0, 0, 0, 0.2;
+  --theme-form-field-border-radius: 0.5rem;
+  --theme-small-font-size: 12px;
+  --theme-medium-font-size: 14px;
+  --theme-large-font-size: 16px;
+  --theme-xlarge-font-size: 18px;
+  --theme-xxlarge-font-size: 22px;
+  --theme-spacing-xsmall: 2px;
+  --theme-spacing-small: 6px;
+  --theme-spacing-small-plus: 8px;
+  --theme-spacing-small-medium: 10px;
+  --theme-spacing-medium: 12px;
+  --theme-spacing-large: 18px;
+  --theme-spacing-xlarge: 22px;
+  --theme-elements-container-height: 35px;
+  --theme-elements-small-container-height: 31px;
+
+  --theme-height-width-xxsmall : 6px;
+  --theme-height-width-xsmall : 12px;
+  --theme-height-width-medium :  20px;
+  --theme-height-width-large : 30px;
+  --theme-height-width-xlarge : 40px;
+  --theme-height-width-xxlarge : 50px;
+  --theme-form-field-width: 250px;
+  --theme-card-height: 105px;
+  --theme-small-card-width: 200px;
+  --theme-medium-card-width: 300px;
+  --theme-tile-circle-height : 32px;
+  --theme-filter-wrapper-min-height : 7px;
+  --theme-context-menu-width: 180px;
+  --theme-datetime-popup-width: 300px;
+
+  //input box variable
+  --theme-xsamll-input-box-width : 70px;
+  --theme-samll-input-box-width : 180px;
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-inverse),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      state-layer-size: 33px,
+      touch-target-display: none,
+    )
+  );
+
+  mat-icon {
+    font-size: 22px;
+    height: 22px;
+    width: 22px;
+  }
+
+  mat-option {
+    min-height: var(--theme-elements-container-height);
+  }
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+    ),
+    $overrides: (
+      "surface": var(--theme-surface),
+      "primary": var(--theme-primary),
+      "error": var(--theme-danger),
+      "on-primary": var(--theme-base)
+    )
+  );
+
+  @include mat.tooltip-overrides(
+    (
+      container-color: var(--theme-inverse),
+      supporting-text-color: var(--theme-base),
+      container-shape: var(--theme-form-field-border-radius),
+    )
+  );
+
+  /*
+ * This selector targets the element with the class 'multiline-tooltip' 
+ * (which is the actual tooltip panel) and applies the required CSS.
+ */
+  .multiline-tooltip {
+    white-space: pre-wrap;
+  }
+
+  $message-types: (
+    "error": var(--theme-danger),
+    "success": var(--theme-success),
+    "warning": var(--theme-warn),
+    "info": var(--theme-info),
+  );
+
+  // Loop over types and generate GLOBAL classes
+  @each $type, $color in $message-types {
+    // This matches the class we created in HTML: .acty-tooltip-error, etc.
+    .acty-tooltip-#{$type} {
+      // Override the tooltip color tokens for this specific class
+      @include mat.tooltip-overrides(
+        (
+          container-color: $color,
+        )
+      );
+    }
+  }
+
+  @include mat.form-field-overrides(
+    (
+      container-height: 35px,
+      container-text-line-height: 25px,
+      container-vertical-padding: 5px,
+      outlined-container-shape: var(--theme-form-field-border-radius),
+      outlined-outline-color: var(--theme-border-100),
+      outlined-hover-outline-color: var(--theme-border),
+    )
+  );
+
+  @include mat.checkbox-overrides((
+    touch-target-display: none,
+    state-layer-size: var(--theme-elements-container-height),
+  ));
+}
+
+* {
+  font-family: unset !important;
+  scrollbar-width: thin;
+}
+
+html,
+body {
+  height: 100%;
+  font-size: var(--theme-medium-font-size);
+  margin: 0;
+}
+mat-icon {
+  font-family: "Material Icons" !important;
+  display: flex !important;
+}
+
+.form-field-small {
+  @include mat.form-field-overrides(
+    (
+      container-height: 25px,
+      container-text-line-height: 25px,
+      container-vertical-padding: 3px,
+      outlined-container-shape: var(--theme-form-field-border-radius),
+    )
+  );
+
+  .acty-text-input,
+  .acty-number-input,
+  .acty-datetime-field,
+  .acty-dropdowm-field {
+    @include mat.icon-button-overrides(
+      (
+        state-layer-size: var(--theme-height-width-large),
+      )
+    );
+  }
+
+  @include mat.checkbox-overrides(
+    (
+      state-layer-size: 25px,
+    )
+  );
+}
+.mat-mdc-paginator-container {
+  justify-content: center !important;
+}
+//cannot be accessed from splitbutton component, so placed it here as overlay element will be avaialble outside the app component
+.split-button-menu-panel {
+  max-width: none !important;
+
+  @include mat.menu-overrides(
+    (
+      container-color: var(--theme-base),
+      container-shape: 0px,
+    )
+  );
+
+  .split-button-menu-item {
+    min-height: var(--theme-elements-container-height);
+  }
+}
+
+.multiselect-menu {
+  max-width: none !important;
+
+  @include mat.menu-overrides(
+    (
+      container-color: var(--theme-base),
+      container-shape: 0px,
+    )
+  );
+}
+
+.buttonwrapper-menu {
+  max-width: none !important;
+
+  @include mat.menu-overrides(
+    (
+      container-color: var(--theme-base),
+      container-shape: 0px,
+    )
+  );
+}
+
+.grid-filter-menu-panel {
+  max-width: none !important;
+
+  .mat-mdc-form-field {
+    max-width: 200px;
+  }
+
+  @include mat.menu-overrides(
+    (
+      container-color: var(--theme-base),
+      container-shape: 0px,
+    )
+  );
+
+  .grid-filter-menu-div {
+    padding: var(--theme-spacing-small) var(--theme-spacing-medium);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .filter-rules-div {
+      flex-grow: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .border-bottom {
+        border-bottom: 1px solid var(--theme-inverse);
+      }
+    }
+
+    .grid-filter-multiselect {
+      min-width: 200px;
+      text-wrap-mode: nowrap;
+      justify-content: flex-end;
+    }
+
+    .grid-filter-rules-block {
+      overflow-x: hidden;
+    }
+    .grid-filter-bottom-btn-container {
+      display: flex;
+      justify-content: space-between;
+      padding-top: var(--theme-spacing-small);
+      gap: 2px; // minimum space
+    }
+  }
+}
+
+.select-menu-panel {
+  @include mat.select-overrides(
+    (
+      panel-background-color: var(--theme-base),
+    )
+  );
+
+  .select-option {
+    min-height: var(--theme-elements-container-height);
+  }
+}
+
+.menu-button-menu-panel {
+  max-width: none !important;
+
+  @include mat.menu-overrides(
+    (
+      container-color: var(--theme-base),
+      container-shape: 0px,
+    )
+  );
+
+  .menu-button-menu-item {
+    min-height: var(--theme-elements-container-height);
+  }
+}
+.mat-mdc-paginator-container {
+  justify-content: center !important;
+}

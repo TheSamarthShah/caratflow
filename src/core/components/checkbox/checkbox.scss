@@ -1,0 +1,58 @@
+@use "@angular/material" as mat;
+
+.checkbox-container {
+  display: flex;
+  justify-content: center;
+  .checkbox {
+      &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  }
+}
+.checkbox-hint {
+    cursor: default;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre-line;
+    text-wrap-mode: nowrap;
+    mat-hint {
+      display: flex;
+    }
+    .hint-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      span {
+        
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+      }
+    }
+  }
+
+  // Define your message types and their corresponding colors
+  $message-types: (
+    "error": var(--theme-danger),
+    "success": var(--theme-success),
+    "warning": var(--theme-warn),
+    "info": var(--theme-info),
+  );
+
+  // Loop over each type to generate the CSS
+  @each $type, $color in $message-types {
+    // This will create .acty-text-input-error, .acty-text-input-success, etc.
+    .acty-checkbox-#{$type} {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: $color;
+      @include mat.icon-overrides(
+        (
+          color: currentColor,
+        )
+      );
+    }
+  }

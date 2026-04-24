@@ -1,0 +1,80 @@
+<acty-dialog-box
+  #dialog
+  [title]="'CORE.SORTDATA.Label'"
+  [showTitle]="true"
+  [showIcon]="false"
+  [showClose]="true"
+  [showFooterButton]="false"
+  [width]="'auto'"
+  [height]="'auto'"
+  [isDraggable]="true"
+  [backgroundAccess]="false"
+  (dialogClosed)="onCloseDialog($event)"
+>
+  <div class="sort-data-Dialog-footer" dialog-footer>
+    <acty-button
+      [text]="'CORE.SORTDATA.ResetBtn' | translate"
+      type="outlined"
+      (clicked)="resetSort()"
+    />
+    <acty-button text="OK" type="filled" (clicked)="applySort()" [severity]="'primary'"/>
+  </div>
+  <div>
+    @for(column of sortingData().Columns; track column.SortSeq) {
+    <div class="acty-Selector-Container">
+      <label class="display-label"
+        >{{ "CORE.SORTDATA.Sort" | translate }}{{ column.SortSeq }}</label
+      >
+
+      <acty-dropdown
+        [dataSource]="sortOptions"
+        [displayExpr]="'caption'"
+        [placeholder]="'CORE.SORTDATA.NoneSelectedOption' | translate"
+        (selectionChange)="onSelectionChanged($event, column)"
+        [isVisible]="true"
+        [isMultiple]="false"
+        [isSearch]="false"
+        [selectedValue]="column.SortColumn || ''"
+        [valueExpr]="'dataField'"
+        [isNullable]="false"
+        [required]="false"
+      >
+      </acty-dropdown>
+
+      <acty-radio-button
+        [toolTip]="'Sort Order Options'"
+        [name]="'OrderGroup' + column.SortSeq"
+        [align]="'after'"
+        [children]="[
+          { caption: 'CORE.SORTDATA.Ascending', code: '0', checked: getDefaultValue(column, '0') },
+          { caption: 'CORE.SORTDATA.Descending', code: '1', checked: getDefaultValue(column, '1') }
+        ]"
+        (selectionChange)="onSortTypeChanged($event, column)">
+      </acty-radio-button>
+      <!-- [defaultValue]="getDefaultValue(column, '0')"   -->
+      <!-- <acty-radio-button
+        [toolTip]="'Ascending Option'"
+        label="CORE.SORTDATA.Ascending"
+        value="0"
+        [checked]="getDefaultValue(column, '0')"
+        [name]="'OrderGroup' + column.SortSeq"
+        [align]="'after'"
+        (selectionChange)="onSortTypeChanged($event, column)"
+      >
+      </acty-radio-button>
+      <acty-radio-button
+        [toolTip]="'Descending Option'"
+        label="CORE.SORTDATA.Descending"
+        [checked]="getDefaultValue(column, '1')"
+        value="1"
+        [name]="'OrderGroup' + column.SortSeq"
+        [align]="'after'"
+        (selectionChange)="onSortTypeChanged($event, column)"
+      >
+      </acty-radio-button> -->
+      <!-- [defaultValue]="getDefaultValue(column, '1')" -->
+    </div>
+
+    }
+  </div>
+</acty-dialog-box>

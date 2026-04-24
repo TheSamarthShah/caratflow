@@ -1,0 +1,85 @@
+<acty-dialog-box
+  #RefScreen
+  [showFooterButton]="false"
+  [showClose]="false"
+  [showIcon]="false"
+  [buttonPosition]="'center'"
+  [width]="'800px'"
+  [height]="'800px'"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+>
+  <div class="title-bar" dialog-header>
+    <span class="screen-name"
+      >{{ "CORE.REFERENCESCREEN.ReferenceLbl" | translate }}
+      {{ refTitleCaption | translate }}</span
+    >
+    <div class="button-container">
+      <acty-button
+        [type]="'icon-outlined'"
+        [leftIcon]="showFilter ? 'expand_less' : 'expand_more'"
+        (clicked)="toggleFilter()"
+        [severity]="'primary'"
+      ></acty-button>
+      <acty-button
+        [type]="'icon-outlined'"
+        [leftIcon]="'close'"
+        (clicked)="onDialogClose()"
+      ></acty-button>
+    </div>
+  </div>
+
+  <div #mainDiv class="mainDiv">
+    <!-- Splitter -->
+    <acty-splitter
+      #splitter
+      direction="vertical"
+      (sizeChange)="onSizeChange($event)"
+      class="custom-splitter"
+    >
+      <!-- Splitter -->
+
+      <div acty-split-panel class="filterDiv filter-panel splitter-panel" #filterContainer [size]="firstPanelSize" [minSize]="firstPanelMinDrag">
+        <div
+          #filterWrapper
+          class="filter-wrapper"
+          [class.collapsed]="!showFilter"
+        >
+        </div>
+      </div>
+
+      @if(visible()){
+      <div acty-split-panel class="refdataDiv splitter-panel" [minSize]="firstPanelMinDrag">
+        <acty-grid
+          #gridComponent
+          [formId]="formId"
+          [userId]="userId"
+          [isEditableGrid]="false"
+          [dataGrid]="dataGrid"
+          [GridMenuBtns]="GridBtns"
+          [getDataUrl]="getDataUrl"
+          [searchList]="gridFilters"
+          [additionalSearchData]="AddtionalData"
+          [apiObjectName]="'ReferenceScreenRecords'"
+          [formLoaderKey]="formLoaderKey()"
+          [ignoreButtonSetting]="true"
+          [isButtonDisabledInp]="isGridButtonDisabled.bind(this)"
+          [letParentMaintainCellChanges]="true"
+          (SelecteChange)="onGridSelectionChanged($event)"
+          (doubleClickedRow)="handleRowDoubleClick($event)"
+          (onButtonClicked)="onButtonClicked($event)"
+          (onGridActionRequest)="handleGridActionRequest($event)"
+        ></acty-grid>
+      </div>
+      }
+    </acty-splitter>
+    <acty-reference-initial-searchkbn
+      #refInitialSearchKBN
+      [displayFlgInp]="openReferenceInitialDailog"
+      [formId]="formId"
+      [userId]="userId"
+      [referenceScreenId]="referenceScreenId()"
+      (dialogClose)="onCloseReferenceInitialDialog()"
+    ></acty-reference-initial-searchkbn>
+  </div>
+  <acty-loader [key]="formLoaderKey()"></acty-loader>
+</acty-dialog-box>

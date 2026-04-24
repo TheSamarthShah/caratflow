@@ -1,0 +1,1043 @@
+@use "@angular/material" as mat;
+
+.acty-grid {
+  --material-minHorizontalPadding-for-formFields: 16px;
+  --material-dropdown-svg-size-from-dom: 24px;
+  --setting-px-for-dropdown-icon: 10px;
+  position: relative;
+
+  .text-nowrap {
+    text-wrap-mode: nowrap;
+  }
+
+  .white-space-nowrap {
+    white-space: nowrap;
+  }
+
+  @include mat.toolbar-overrides(
+    (
+      container-background-color: var(--theme-base),
+    )
+  );
+  @include mat.datepicker-overrides(
+    (
+      calendar-container-background-color: var(--theme-base),
+    )
+  );
+  @include mat.select-overrides(
+    (
+      panel-background-color: var(--theme-base),
+    )
+  );
+  //  --mat-option-selected-state-layer-color: var(--mat-sys-primary);;
+  //--mat-option-selected-state-label-text-color: var(--theme-base);
+  @include mat.paginator-overrides(
+    (
+      container-text-size:
+        var(
+          --mat-form-field-container-text-size,
+          var(--mat-sys-body-large-size)
+        ),
+      select-trigger-text-size:
+        var(
+          --mat-form-field-container-text-size,
+          var(--mat-sys-body-large-size)
+        ),
+      container-text-font: var(--default-font-family),
+      container-background-color: var(--theme-surface-50),
+      form-field-container-height: var(--theme-height-width-large),
+      form-field-container-vertical-padding: 5px,
+    )
+  );
+
+  .table-container {
+    @include mat.table-overrides(
+      (
+        background-color: var(--theme-base),
+        row-item-container-height: var(--theme-elements-container-height),
+        header-container-height: var(--theme-elements-container-height),
+        header-headline-weight: 400,
+      )
+    );
+
+    background-color: var(--theme-base);
+    overflow: auto;
+    width: 100%;
+    //contain: layout size;
+    will-change: height;
+
+    .acty-grid-table,
+    .acty-tabular-grid-table {
+      .acty-container {
+        background-color: var(--mat-toolbar-container-background-color);
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .filter-action {
+        padding: 4px;
+        border-radius: 50%;
+        background: transparent;
+        transition: background-color 0.2s ease;
+
+        &.redirect {
+          @include mat.icon-overrides(
+            (
+              color: var(--theme-info),
+            )
+          );
+          border: 1px solid var(--theme-info);
+          display: inline-block;
+          transform: rotate(45deg);
+
+          &:hover {
+            background-color: rgba(2, 132, 199, 0.1);
+          }
+        }
+
+        &.edit {
+          @include mat.icon-overrides(
+            (
+              color: var(--theme-primary),
+            )
+          );
+          border: 1px solid var(--theme-primary);
+
+          &:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+          }
+        }
+
+        &.delete {
+          @include mat.icon-overrides(
+            (
+              color: var(--theme-danger),
+            )
+          );
+          border: 1px solid var(--theme-danger);
+
+          &:hover {
+            background-color: rgba(220, 38, 38, 0.1);
+          }
+        }
+      }     
+
+      .indexColumn,
+      .multiSelectColumn {
+        
+        text-align: center;
+        background-color: var(--theme-base);
+        border: 0.1px solid var(--theme-border);
+        padding: 0 var(--theme-spacing-small);
+      }
+      .multiSelectColumn{
+         width: 35px;
+      }
+      .indexColumn{
+        text-wrap-mode: nowrap;
+      }
+
+      .resizer {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 5px;
+        height: 100%;
+        cursor: col-resize;
+        user-select: none;
+      }
+
+      .icon-fit {
+        height: 32px;
+        /* Or 1rem, depending on your font size */
+        //width: 100%;
+        display: inline-block;
+        object-fit: contain;
+        vertical-align: middle;
+        transform: scaleX(-1);
+      }
+    }
+
+    .acty-grid-table {
+      min-width: unset;
+
+      .field-label-focused {
+        background-color: var(--theme-interactive-active) !important;
+      }
+
+      .grid-dataRow.selected-row {
+        background-color: var(--theme-interactive-active);
+
+        .editable-column {
+          padding: 0;
+        }
+
+        .tabular-grid-header {
+          background-color: var(--theme-interactive-active);
+        }
+
+        .tabular-grid-tabColumn {
+          background-color: var(--theme-interactive-active);
+        }
+      }
+
+      .grid-cell {
+        align-content: start;
+        .grid-edit-data {
+          display: grid;
+        }
+        .grid-display-data {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          height: var(--theme-elements-small-container-height);
+          span {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-wrap-mode: nowrap;
+            flex: 1;
+          }
+          .drop-down-icons-button {
+            justify-content: center;
+            align-items: center;
+            font-size: var(--material-dropdown-svg-size-from-dom);
+            width: var(--material-dropdown-svg-size-from-dom);
+            height: var(--material-dropdown-svg-size-from-dom);
+            padding-right: var(--setting-px-for-dropdown-icon);
+          }
+        }
+
+        .text-input-hint,
+        .number-input-hint,
+        .date-input-hint,
+        .dropdown-input-hint {
+          background-color: var(--theme-base);
+
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: pre-line;
+          text-wrap-mode: nowrap;
+          display: flex;
+          .hint-container {
+            cursor: default;
+            width: 100%;
+            display: flex;
+            span {
+              flex-grow: 1;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              text-align: left;
+            }
+          }
+
+          // Define your message types and their corresponding colors
+          $message-types: (
+            "error": var(--theme-danger),
+            "success": var(--theme-success),
+            "warning": var(--theme-warn),
+            "info": var(--theme-info),
+          );
+
+          // Loop over each type to generate the CSS
+          @each $type, $color in $message-types {
+            // This will create .acty-text-input-error, .acty-text-input-success, etc.
+            .cell-show-hint-#{$type} {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              color: $color;
+              @include mat.icon-overrides(
+                (
+                  color: currentColor,
+                )
+              );
+            }
+          }
+        }
+        ::ng-deep {
+          .acty-text-input,
+          .acty-number-input,
+          .acty-datetime-field,
+          .acty-dropdowm-field {
+            @include mat.form-field-overrides(
+              (
+                outlined-container-shape: 0px,
+              )
+            );
+            ///background-color: transparent;
+          }
+
+          .acty-text-input-hint,
+          .acty-number-input-hint,
+          .acty-datetime-hint,
+          .acty-dropdown-hint,
+          .acty-checkbox-hint,
+          .acty-radiobutton-hint {
+            background-color: var(--theme-base);
+          }
+        }
+
+        border: 0.1px solid var(--theme-border);
+
+        .grid-vertical-padding {
+          padding-top: var(--theme-spacing-xsmall);
+        }
+      }
+
+      .grid-header {
+        align-content: center;
+        font-size: var(--theme-medium-font-size);
+
+        * {
+          font-size: inherit;
+        }
+
+        .column-header-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          .column-header-name {
+            text-wrap-mode: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: var(--theme-small-font-size);
+          }
+
+          .column-header-button-container {
+            display: flex;
+          }
+        }
+      }
+    }
+
+    .acty-grid-table.acty-tabular-grid-table {
+      min-width: 100%;
+      .cursor-pointer {
+        cursor: pointer;
+      }
+      .tabular-grid-cell {
+        .updatedField {
+          ::ng-deep {
+            .acty-text-input,
+            .acty-number-input,
+            .acty-datetime-field,
+            .acty-dropdowm-field {
+              background-color: var(--theme-success-light);
+            }
+          }
+        }
+
+        .errorField {
+          ::ng-deep {
+            .acty-text-input,
+            .acty-number-input,
+            .acty-datetime-field,
+            .acty-dropdowm-field {
+              background-color: var(--theme-danger-light);
+            }
+
+            .acty-text-input-hint,
+            .acty-number-input-hint,
+            .acty-datetime-hint,
+            .acty-dropdown-hint,
+            .acty-checkbox-hint,
+            .acty-radiobutton-hint {
+              padding: var(--theme-spacing-xsmall) 0
+                calc(var(--theme-spacing-xsmall) + 1px) 0; // added 1px of .group-row border, because we want hint same size as one row.
+            }
+          }
+
+          .text-input-hint,
+          .number-input-hint,
+          .date-input-hint,
+          .dropdown-input-hint,
+          .checkbox-input-hint {
+            padding: var(--theme-spacing-xsmall) 0
+              calc(var(--theme-spacing-xsmall) + 1px);
+          }
+        }
+
+        border: 0.1px solid var(--theme-border);
+        align-content: start;
+      }
+
+      .tabular-grid-header {
+        //background-color: #fcfedd;
+        background-color: var(--theme-surface-10);
+      }
+
+      .tabular-grid-headerRow {
+        th {
+          padding: 0;
+        }
+
+        &.hide-headers th:not(.mat-column-no) {
+          display: none;
+        }
+      }
+
+      .tabular-grid-dataRow {
+        td:not(.indexColumn) {
+          padding: 0;
+        }
+
+        background-color: var(--theme-base);
+
+        .field-value-editable-container {
+          .field-value-readonly {
+            box-sizing: border-box;
+            background-color: var(--theme-base);
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid var(--theme-inverse);
+            border-radius: var(--theme-form-field-border-radius);
+            overflow: hidden;
+            @include mat.icon-button-overrides(
+              (
+                state-layer-size: var(--theme-height-width-large),
+              )
+            );
+            height: var(--theme-elements-small-container-height);
+            align-items: center;
+            span {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              padding: 0
+                max(
+                  var(--material-minHorizontalPadding-for-formFields),
+                  var(--theme-spacing-medium)
+                );
+            }
+            .reference-button {
+              height: 100%;
+              overflow: hidden;
+            }
+            .calendar-icons-button {
+              height: 100%;
+              justify-content: center;
+              align-items: center;
+            }
+
+            .reference-icons-button{
+              //4px right-side padding in the input box of the reference screen icon in the editable tabular grid.
+              padding-right: 4px;
+            }
+            .drop-down-icons-button {
+              justify-content: center;
+              align-items: center;
+              font-size: var(--material-dropdown-svg-size-from-dom);
+              width: var(--material-dropdown-svg-size-from-dom);
+              height: var(--material-dropdown-svg-size-from-dom);
+              padding-right: var(--setting-px-for-dropdown-icon);
+            }
+          }
+          .updatedCell {
+            background-color: var(--theme-success-light);
+          }
+          ::ng-deep .grid-require-column {
+            .acty-text-input,
+            .acty-number-input,
+            .acty-datetime-field,
+            .acty-dropdowm-field {
+              background-color: var(--theme-danger-light);
+            }
+          }
+          div:not(.selected-row).grid-require-column {
+            background-color: var(--theme-danger-light);
+          }
+          .errorCell {
+            background-color: var(--theme-danger-light);
+            padding: 0;
+          }
+          .editable-tabulargrid-cells {
+            display: flex;
+            width: 100%;
+          }
+        }
+        .field-value-readonly-container {
+          .field-value-readonly {
+            color: var(--theme-readonly-text-color);
+            .editable-tabulargrid-cells {
+              span {
+                width: 100%;
+                display: block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+          }
+        }
+
+        &:hover {
+          background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+          z-index: 1;
+
+          .tabular-grid-header {
+            background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+          }
+
+          .tabular-grid-tabColumn {
+            background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+          }
+
+          .field-value-editable-container {
+            background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+          }
+          .field-value-readonly-container {
+            background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+          }
+        }
+      }
+
+      .tabular-grid-dataRow.selected-row {
+        //background-color: var(--theme-surface-50);
+        --selected-border-color: var(--theme-primary);
+        --selected-border-size: 2px;
+
+        .tabular-grid-cell,
+        .multiSelectColumn {
+          border-top: var(--selected-border-size) solid
+            var(--selected-border-color);
+          border-bottom: var(--selected-border-size) solid
+            var(--selected-border-color);
+        }
+
+        .indexColumn {
+          border-right: var(--selected-border-size) solid
+            var(--selected-border-color);
+        }
+
+        .tabular-grid-cell:last-child {
+          border-right: var(--selected-border-size) solid
+            var(--selected-border-color);
+        }
+      }
+
+      .group-container {
+        display: flex;
+        flex-direction: column;
+        
+        .group-row {
+          display: flex;
+          border-bottom: 1px solid var(--theme-border);
+          ::ng-deep .grid-require-column {
+            .acty-text-input,
+            .acty-number-input,
+            .acty-datetime-field,
+            .acty-dropdowm-field {
+              background-color: var(--theme-danger-light);
+            }
+          }
+
+          .group-section{
+            display: flex;
+            border-right: 1px solid var(--theme-border);
+          }
+
+          .text-input-hint,
+          .number-input-hint,
+          .date-input-hint,
+          .dropdown-input-hint,
+          .checkbox-input-hint {
+            background-color: var(--theme-base);
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: pre-line;
+            text-wrap-mode: nowrap;
+            display: flex;
+            .hint-container {
+              vertical-align: middle;
+              cursor: default;
+              width: 100%;
+              display: flex;
+              span {
+                flex-grow: 1;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                text-align: left;
+              }
+              .hint-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+
+            // Define your message types and their corresponding colors
+            $message-types: (
+              "error": var(--theme-danger),
+              "success": var(--theme-success),
+              "warning": var(--theme-warn),
+              "info": var(--theme-info),
+            );
+
+            // Loop over each type to generate the CSS
+            @each $type, $color in $message-types {
+              // This will create .acty-text-input-error, .acty-text-input-success, etc.
+              .cell-show-hint-#{$type} {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: $color;
+                @include mat.icon-overrides(
+                  (
+                    color: currentColor,
+                  )
+                );
+              }
+            }
+          }
+
+          .group-field {
+            display: flex;
+
+            .field-label {
+              line-height: var(--theme-elements-small-container-height);
+              min-height: 100%;
+              padding-left: var(--theme-spacing-large);
+              white-space: nowrap;
+              text-align: right;
+              background-color: var(--theme-surface-10);
+              padding-right: var(--theme-spacing-small);
+              border-right: 1px solid var(--theme-border);
+              font-size: calc(
+                1em - 1px
+              ); //--theme-small-font-size is too small so header will be 1px smaller than global font-size and grid data will be of global font size
+            }
+
+            .field-label.first-field-label{
+              border-left: 1px solid var(--theme-border);
+            }
+
+            .field-value {
+              padding: var(--theme-spacing-xsmall) var(--theme-spacing-small);
+              //align-content: center;
+              white-space: nowrap;
+              overflow-x: auto;
+              scrollbar-width: none;
+              line-height: var(--theme-elements-small-container-height);
+              min-height: var(--theme-elements-small-container-height);
+              .field-value-readonly {
+                //padding-left: var(--theme-spacing-small);
+              }
+            }
+
+            .header-label {
+              line-height: var(--theme-elements-small-container-height);
+              min-height: var(--theme-elements-small-container-height);
+              padding-left: var(--theme-spacing-small);
+              white-space: nowrap;
+              font-size: calc(
+                1em - 1px
+              ); //--theme-small-font-size is too small so header will be 1px smaller than global font-size and grid data will be of global font size
+            }
+          }
+
+          .group-field.other-group-field {
+            //border-left: 1px solid var(--theme-border);
+          }
+        }
+      }
+
+      /*.tabular-grid-headerRow {
+  .tabular-grid-cell{
+  border-bottom-color: var(--theme-primary) !important;
+  }
+  .indexColumn{
+  border-bottom-color: var(--theme-primary) !important;
+
+  }
+  .statusColumn{
+  border-bottom-color: var(--theme-primary) !important;
+
+  }
+  .group-container {
+    .group-section {
+      .group-row {
+          border-bottom-color: var(--theme-primary) !important;
+      }
+    }
+  }
+}*/
+    }
+  }
+
+  .active-grid {
+    border: 1px solid var(--theme-primary);
+    box-sizing: border-box;
+  }
+
+  .table-container.readonlyGrid-table-container {
+    .grid-dataRow {
+      background-color: var(--theme-base);
+
+      &:nth-child(odd) {
+        background-color: var(--theme-surface-50);
+      }
+
+      &:hover {
+        background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+        z-index: 1;
+      }
+    }
+
+    .tabular-grid-dataRow {
+      /*background-color: var(--theme-surface-50);
+      .field-value-readonly {
+        background-color: var(--theme-base);
+        border-radius: var(--theme-form-field-border-radius);
+      }*/
+      /*&:nth-child(even) {
+        background-color: var(--theme-surface-10);
+        background-color: var(--theme-surface-50);
+        .field-value-readonly {
+          background-color: var(--theme-base);
+          border-radius: var(--theme-form-field-border-radius);
+        }
+      }*/
+
+      &:hover {
+        background-color: rgba(var(--theme-interactive-hover-rgb), 0.5);
+        z-index: 1;
+      }
+    }
+  }
+
+  .table-container.editableGrid-table-container {
+    .acty-grid-table {
+      .input-wrapper-tag {
+        display: grid;
+      }
+      tr:not(.deleted-row) td.editable-column {
+        cursor: pointer;
+        background-color: var(--theme-base);
+      }
+
+      .statusColumn {
+        padding: 0;
+        min-width: 35px;
+
+        span {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+
+      td.statusColumn {
+        color: var(--theme-base);
+      }
+
+      td.statusColumn.updateRowStatus {
+        background-color: var(--theme-success);
+      }
+
+      td.statusColumn.newRowStatus {
+        background-color: var(--theme-info);
+      }
+
+      td.statusColumn.deleteRowStatus {
+        background-color: var(--theme-danger);
+      }
+
+      td.statusColumn.errorRowStatus {
+        background-color: var(--theme-base);
+      }
+
+      .grid-dataRow {
+        background-color: var(--theme-surface-50);
+
+        &:nth-child(odd) {
+          background-color: var(--theme-surface-50);
+        }
+
+        &:hover {
+          background-color: rgba(var(--theme-interactive-hover-rgb));
+
+          .editable-column {
+            background-color: rgba(var(--theme-interactive-hover-rgb));
+          }
+        }
+        .icon-cell {
+          padding-right: unset;
+        }
+        .grid-cell.grid-require-column.grid-require-column-td {
+          background-color: var(--theme-danger-light);
+        }
+
+        .grid-cell.updatedCell {
+          background-color: var(--theme-success-light);
+        }
+
+        .grid-cell.errorCell {
+          background-color: var(--theme-danger-light);
+          padding: 0;
+          .grid-display-data {
+            span {
+              padding: 0
+                max(
+                  var(--material-minHorizontalPadding-for-formFields),
+                  var(--theme-spacing-medium)
+                );
+            }
+          }
+        }
+      }
+
+      .grid-dataRow.selected-row {
+        td.show-hint {
+          vertical-align: top;
+        }
+
+        ::ng-deep .updatedCell {
+          .acty-text-input,
+          .acty-number-input,
+          .acty-datetime-field,
+          .acty-dropdowm-field {
+            background-color: var(--theme-success-light);
+          }
+        }
+
+        ::ng-deep .grid-require-column {
+          .acty-text-input,
+          .acty-number-input,
+          .acty-datetime-field,
+          .acty-dropdowm-field {
+            background-color: var(--theme-danger-light);
+            border-radius: 0px;
+          }
+        }
+
+        ::ng-deep .errorCell {
+          .acty-text-input,
+          .acty-number-input,
+          .acty-datetime-field,
+          .acty-dropdowm-field {
+            background-color: var(--theme-danger-light);
+          }
+        }
+
+        //background-color: var(--theme-surface-50);
+        --selected-border-color: var(--theme-primary);
+        --selected-border-size: 2px;
+        background-color: var(--theme-interactive-active);
+
+        .grid-cell,
+        .multiSelectColumn {
+          border-top: var(--selected-border-size) solid
+            var(--selected-border-color);
+          border-bottom: var(--selected-border-size) solid
+            var(--selected-border-color);
+        }
+
+        .indexColumn {
+          border-right: var(--selected-border-size) solid
+            var(--selected-border-color);
+        }
+
+        .grid-cell:last-child {
+          border-right: var(--selected-border-size) solid
+            var(--selected-border-color);
+        }
+      }
+
+      .grid-header {
+        background-color: var(--theme-surface-50);
+      }
+
+      .grid-header.editable-column {
+        background-color: var(--theme-base);
+      }
+    }
+  }
+
+  .grid-caption {
+    padding: var(--theme-spacing-small) var(--theme-spacing-large);
+    background-color: var(--theme-surface-50);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .left-buttons-container,
+    .right-buttons-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--theme-spacing-small);
+    }
+  }
+}
+
+td.grid-cell.selected-cell {
+  background-color: var(--theme-interactive-active-secondary);
+  color: var(--theme-base);
+}
+
+.detailview-container {
+  display: flex;
+  align-items: center;
+}
+
+.detailview-label {
+  min-width: 130px;
+}
+
+.detailview-custom-grid {
+  --detailview-height: 80px;
+  display: grid;
+  gap: 1rem;
+  padding: var(--theme-spacing-medium);
+  overflow: auto;
+  max-height: var(--detailview-height);
+}
+
+.detailview-column-span {
+  align-content: center;
+}
+
+.grid-paginator-wrapper {
+  position: relative;
+  background-color: var(--theme-surface-50);
+  background-color: var(--theme-base);
+  @include mat.paginator-overrides((
+    container-background-color: var(--theme-base),
+  ));
+  padding: 0 var(--theme-spacing-large);
+   ::ng-deep *{
+      text-wrap-mode: nowrap;
+      flex-wrap: nowrap;
+    }
+
+  .background-loader {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--theme-spacing-small);
+
+    .background-loader-text {
+      margin-left: 0.2rem;
+    }
+  }
+
+  .wrapper-visible {
+    width: auto;
+  }
+  .wrapper-not-visible {
+    width: auto;
+  }
+
+  .extra-buttons-container {
+    margin: 0.5rem 0 0.5rem 0.5rem;
+  }
+  .extra-buttons-no-wrapper {
+    width: auto;
+  }
+
+  .paginator-has-wrapper {
+    display: flex;
+    justify-content: right;
+    flex: 1;
+  }
+  .paginator-no-wrapper {
+    width: auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 550px) {
+  // .wrapper-visible {
+  //   width: 30% !important;
+  // }
+  .extra-buttons-container {
+    width: 35%;
+  }
+  .paginator-has-wrapper {
+    //width: 35%;
+    //max-width: 35%;
+  }
+}
+
+@media (min-width: 551px) and (max-width: 700px) {
+  // .wrapper-visible {
+  //   width: 30%;
+  // }
+  .extra-buttons-container {
+    width: 35%;
+    min-width: 35%;
+  }
+  .paginator-has-wrapper {
+   // width: 35%;
+   // min-width: 35%;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1080px) {
+  // .wrapper-visible {
+  //   width: 38% !important;
+  // }
+  .extra-buttons-container {
+    width: 20%;
+    .cell-summary {
+      display: flex;
+      // justify-content: flex-end;
+    }
+  }
+  .paginator-has-wrapper {
+   // width: 42%;
+   // min-width: 40%;
+  }
+}
+
+@media (min-width: 1081px) and (max-width: 1570px) {
+  // .wrapper-visible {
+  //   width: 60% !important;
+  // }
+  .extra-buttons-container {
+    width: 15%;
+  }
+  .paginator-has-wrapper {
+   // width: 25%;
+    //min-width: 20%;
+  }
+}
+
+@media (min-width: 1571px) {
+  // .wrapper-visible {
+  //   width: 63%;
+  // }
+  .extra-buttons-container {
+    width: 10%;
+  }
+  .paginator-has-wrapper {
+   // width: 27%;
+    //min-width: 27%;
+  }
+}
+
+.grid-filter-field {
+  margin-bottom: var(--theme-spacing-small-plus);
+}
+
+.filter-state-rule {
+  padding-bottom: var(--theme-spacing-small-plus);
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-filter-rule-select {
+  width: 100%;
+  margin-bottom: var(--theme-spacing-small-plus);
+}
+
+.grid-filter-rule-value {
+  margin-bottom: var(--theme-spacing-small-plus);
+}

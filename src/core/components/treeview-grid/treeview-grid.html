@@ -1,0 +1,71 @@
+
+<div class="tree-container acty-tree-container">
+
+    <div class="button-container">
+      <acty-button-wrapper
+        #buttonWrapper
+        [buttons]="buttons()"
+        [formId]="formId()"
+        [childFormId]="gridId()"
+        [defaultVisibleCount]="GridMenuBtns().length"
+        [buttonOrder]="buttonOrder()"
+        [buttonSettingVisible]="buttonSettingVisible()"
+        [ignoreButtonSetting]="ignoreButtonSetting()"
+        (buttonClicked)="buttonClicked($event)"
+      >
+      </acty-button-wrapper>
+    </div>
+
+    <div class="tree-scroll-wrapper">
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+
+    <mat-tree-node
+    class = "treenode acty-child-node"
+      *matTreeNodeDef="let node"
+      [style.--tree-level]="node.level"
+      (click)="selectNode(node)"
+      [class.selected-node]="isNodeSelected(node)"
+      [class.child-highlight]="isChildOfActiveParent(node)"
+      [style.padding-left.px]="node.level * 24"
+    >
+      <div class="tree-toggle-spacer" [style.padding-left.px]="32"></div>
+      <div class="tree-button-spacer acty-tree-button-spacer" *ngIf="node.level === 0"></div>
+      <div class="node-content acty-child-node-content">
+        <span class="node-label">{{ node.displayString }}</span>
+      </div>
+    </mat-tree-node>
+
+    <mat-tree-node
+    class = "treenode acty-parent-node"
+      *matTreeNodeDef="let node; when: hasChild"
+      [style.--tree-level]="node.level"
+      (click)="selectNode(node)"
+      [class.selected-node]="isNodeSelected(node)"
+      [class.expanded-parent]="treeControl.isExpanded(node)"
+      [class.child-highlight]="isChildOfActiveParent(node)"
+      [style.padding-left.px]="node.level * 24"
+    >
+      <acty-button suffix-button class="acty-button" [type]="'icon'"
+                leftIcon="{{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}" (click)="toggleExpand($event, node)">
+              </acty-button>
+
+      <div class="node-content acty-parent-node-content">
+        <span class="node-label">{{ node.displayString }}</span>
+      </div>
+    </mat-tree-node>
+
+  </mat-tree>
+    </div>
+
+
+    <div class="tree-form-footer">
+      <acty-form
+        [formConfigData]="formConfigData()"
+        [formGroupsDictionarysignal]="detailFormcontrol"
+        [labelId]="screenName()"
+        [isMaterialFilter]="false"
+        [formId]="formId()"
+      ></acty-form>
+  </div>
+</div>
+

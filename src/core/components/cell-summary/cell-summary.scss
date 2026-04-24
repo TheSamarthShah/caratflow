@@ -1,0 +1,8 @@
+.summary-dialog-body{
+    background-color: var(--theme-base);
+    display: flex;
+    gap: var(--theme-spacing-xlarge);
+    padding-left: var(--theme-spacing-small-medium);
+    padding-right: var(--theme-spacing-small-medium);
+    user-select: none;
+}

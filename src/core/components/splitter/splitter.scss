@@ -1,0 +1,66 @@
+.split-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  &.vertical {
+    flex-direction: column;
+  }
+}
+
+.split-panel {
+  overflow: hidden;
+}
+
+.splitter {
+  --splitter-size: 5px;
+  --split-icon-size: 4px;
+  background: var(--theme-surface-100);
+  width: 5px;
+  cursor: col-resize;
+  user-select: none;
+  position: relative;
+
+  &.vertical {
+    height: var(--splitter-size);
+    width: 100%;
+    cursor: row-resize;
+  }
+
+  .split-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--theme-spacing-small);
+
+    span {
+      display: block;
+      width: var(--split-icon-size);
+      height: var(--split-icon-size);
+      border-radius: 50%;
+      background: var(--theme-inverse);
+      opacity: 0.6;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+  }
+
+  &:hover .split-icon span {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  &.vertical .split-icon {
+    flex-direction: row;
+
+    span {
+      width: var(--split-icon-size);
+      height: var(--split-icon-size);
+    }
+  }
+}

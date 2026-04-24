@@ -1,0 +1,263 @@
+@use "@angular/material" as mat;
+
+.a-button {
+  // Common overrides for all buttons in this component
+  @include mat.button-overrides(
+    (
+      filled-container-shape: var(--theme-form-field-border-radius),
+      outlined-container-shape: var(--theme-form-field-border-radius),
+      text-container-shape: var(--theme-form-field-border-radius),
+      filled-label-text-size: var(--theme-medium-font-size),
+      outlined-label-text-size: var(--theme-medium-font-size),
+      text-label-text-size: var(--theme-medium-font-size),
+      outlined-outline-color: var(--theme-inverse),
+      outlined-label-text-color: var(--theme-inverse),
+      filled-container-color: var(--theme-inverse),
+      text-with-icon-horizontal-padding: var(--theme-spacing-large),
+      filled-horizontal-padding: var(--theme-spacing-large),
+      outlined-horizontal-padding: var(--theme-spacing-large),
+      text-horizontal-padding: var(--theme-spacing-large),
+      filled-container-height: var(--theme-elements-container-height),
+      outlined-container-height: var(--theme-elements-container-height),
+      text-container-height: var(--theme-elements-container-height),
+      outlined-hover-state-layer-opacity: 0,
+      outlined-focus-state-layer-opacity: 0,
+      filled-focus-state-layer-opacity: 0,
+      filled-hover-state-layer-opacity: 0,
+      
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      hover-state-layer-opacity: 0,
+      focus-state-layer-opacity: 0,
+    )
+  );
+
+  text-wrap-mode: nowrap;
+
+  .outlined-btn {
+    background-color: var(--theme-base);
+  }
+
+  .activeBtn {
+    background-color: var(--theme-surface-100);
+  }
+
+  .filled-btn {
+    @include mat.icon-overrides(
+      (
+        color: "",
+      )
+    );
+  }
+
+  .icon-outlined-btn {
+    border: 1px solid currentColor;
+    box-sizing: border-box; 
+  }
+
+  .filled-btn,
+  .outlined-btn,
+  .text-btn {
+    mat-icon {
+      font-size: calc(var(--theme-medium-font-size) + 5px);
+      height: calc(var(--theme-medium-font-size) + 5px);
+      width: calc(var(--theme-medium-font-size) + 5px);
+    }
+  }
+
+  .acty-button-container {
+    &:hover, 
+    &:focus-visible {  
+      box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 50%, transparent);
+    }
+  }
+
+  button.filled-btn {
+    &:hover, 
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--mat-button-filled-container-color) 50%, transparent);
+    }
+  }
+}
+
+// Apply the theme overrides to the button inside the container
+.primary-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-primary),
+      outlined-label-text-color: var(--theme-primary),
+      text-label-text-color: var(--theme-primary),
+      filled-container-color: var(--theme-primary),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-primary),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-primary),
+    )
+  );
+}
+
+.secondary-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-secondary),
+      outlined-label-text-color: var(--theme-secondary),
+      text-label-text-color: var(--theme-secondary),
+      filled-container-color: var(--theme-secondary),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-secondary),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-secondary),
+    )
+  );
+}
+
+.success-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-success),
+      outlined-label-text-color: var(--theme-success),
+      text-label-text-color: var(--theme-success),
+      filled-container-color: var(--theme-success),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-success),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-success),
+    )
+  );
+}
+
+.info-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-info),
+      outlined-label-text-color: var(--theme-info),
+      text-label-text-color: var(--theme-info),
+      filled-container-color: var(--theme-info),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-info),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-info),
+    )
+  );
+}
+
+.warn-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-warn),
+      outlined-label-text-color: var(--theme-warn),
+      text-label-text-color: var(--theme-warn),
+      filled-container-color: var(--theme-warn),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-warn),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-warn),
+    )
+  );
+}
+
+.help-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-help),
+      outlined-label-text-color: var(--theme-help),
+      text-label-text-color: var(--theme-help),
+      filled-container-color: var(--theme-help),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-help),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-help),
+    )
+  );
+}
+
+.danger-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-danger),
+      outlined-label-text-color: var(--theme-danger),
+      text-label-text-color: var(--theme-danger),
+      filled-container-color: var(--theme-danger),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-danger),
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: var(--theme-danger),
+    )
+  );
+}
+
+.disabled-btn {
+  cursor: not-allowed;
+}
+.disabled-btn button {
+  @include mat.icon-overrides(
+    (
+      color: currentColor,
+    )
+  );
+
+  @include mat.icon-button-overrides(
+    (
+      icon-color: currentColor,
+    )
+  );
+}

@@ -1,0 +1,49 @@
+<div class="a-button acty-button" [class]="disabled()? 'disabled-btn ' : '' + severity() + '-btn'">
+  @switch (type()) { @case ('icon') {
+    <button matIconButton type="button" [disabled]="disabled()" [class]="[btnClass(), 'acty-button-container']" (click)="onClick()">
+      <mat-icon class="acty-button-left-icon">{{ leftIcon() }}</mat-icon>
+    </button>
+  } @case ('icon-outlined') {
+      <button matIconButton type="button" [disabled]="disabled()" [class]="[btnClass(), 'icon-outlined-btn', 'acty-button-container']" (click)="onClick()">
+        <mat-icon class="button-left-icon acty-button-left-icon">{{ leftIcon() }}</mat-icon>
+      </button>
+  } @case ('mini fab') {
+  <button matMiniFab type="button" [disabled]="disabled()" [class]="[btnClass(), 'acty-button-container']" (click)="onClick()">
+    <mat-icon class="acty-button-left-icon">{{ leftIcon() }}</mat-icon>
+  </button>
+  }
+  @case ('text'){
+    <button
+    type="button"
+    matButton
+    [disabled]="disabled()"
+    [class]="[btnClass(), 'text-btn', 'acty-button-container']"
+    (click)="onClick()"
+  >
+    @if(leftIcon()){
+    <mat-icon class="acty-button-left-icon">{{ leftIcon() }}</mat-icon>
+    }
+    {{ text() | translate }}
+    @if(rightIcon()){
+    <mat-icon class="acty-button-right-icon" iconPositionEnd>{{ rightIcon() }}</mat-icon>
+    }
+  </button>
+  } @default {
+  <button
+    type="button"
+    [matButton]="type() === 'outlined' ? 'outlined' : 'filled'"
+    [disabled]="disabled()"
+    [class]="[btnClass(), type() === 'outlined' ? 'outlined-btn' : 'filled-btn', 'acty-button-container']"
+    (click)="onClick()"
+  >
+    @if(leftIcon()){
+    <mat-icon class="acty-button-left-icon">{{ leftIcon() }}</mat-icon>
+    }
+    {{ text() | translate }}
+    @if(rightIcon()){
+    <mat-icon class="acty-button-right-icon" iconPositionEnd>{{ rightIcon() }}</mat-icon>
+    }
+  </button>
+  } }
+</div>
+

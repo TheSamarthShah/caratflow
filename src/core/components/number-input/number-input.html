@@ -1,0 +1,56 @@
+@if (isVisible()) {
+<ng-container class="parent">
+  <mat-form-field
+    subscriptSizing="dynamic"
+    class="number-input-field acty-number-input"
+    [appearance]="appearance()"
+    [floatLabel]="floatLabel()"
+    [style]="style()"
+    [class.disabled]="isDisabled()"
+  >
+    @if (label()) {
+    <mat-label>{{ label() }}</mat-label>
+    }
+
+    <input
+      matInput
+      #inputRef
+      class="number-input"
+      type="number"
+      [placeholder]="placeholder()"
+      [required]="required()"
+      [matTooltip]="formField.value"
+      (input)="onInputChange($event.target.value)"
+      (change)="onValueChanged()"
+      [formControl]="formField"
+      (keydown)="handleKeyDown($event)"
+      (blur)="onInputBlur()"
+      step="any"
+      [class.no-spinner]="!showButtons()"
+      actyShowTooltipIfTruncated
+    />
+    <div matSuffix class="suffix-buttons-container">
+      <ng-content select="[suffix-button]"></ng-content>      
+    </div>
+  </mat-form-field>
+
+  <div class="number-input-hint acty-number-input-hint" [style]="style()">
+    @if (hint() && hint()?.message) {
+    <mat-hint [class]="'acty-number-input-' + getHintType()">
+      <div class="hint-container">
+        <div>
+          <mat-icon>{{ getHintIcon() }}</mat-icon>
+        </div>
+        <span
+          [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+          [matTooltipClass]="'acty-tooltip-' + getHintType()"
+          actyShowTooltipIfTruncated
+        >
+          {{ hint()?.message ?? "" | translate : hint()?.params }}
+        </span>
+      </div>
+    </mat-hint>
+    }
+  </div>
+</ng-container>
+}

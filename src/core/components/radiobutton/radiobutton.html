@@ -1,0 +1,38 @@
+<div class="radiobutton-container acty-radiobutton-container">
+  @if (hasChildren) {
+  <ng-container>
+    @for (child of children(); track $index) {
+    <mat-radio-button
+      class="acty-radiobutton radiobutton"
+      [name]="name()"
+      [value]="child.code"
+      [checked]="child.checked || false"
+      [labelPosition]="align()"
+      [matTooltip]="toolTip()"
+      (change)="onSelectionChange($event)"
+      [class.disabled]="isDisabled()"
+    >
+      {{ child.caption | translate }}
+    </mat-radio-button>
+    }
+  </ng-container>
+  }
+  <div class="radiobutton-hint acty-radiobutton-hint" [style]="style()">
+    @if (hint() && hint()?.message) {
+    <mat-hint [class]="'acty-radiobutton-' + getHintType()">
+      <div class="hint-container acty-hint-container">
+        <div>
+          <mat-icon>{{ getHintIcon() }}</mat-icon>
+        </div>
+        <span
+          [matTooltip]="hint()?.message ?? '' | translate : hint()?.params"
+          [matTooltipClass]="'acty-tooltip-' + getHintType()"
+          actyShowTooltipIfTruncated
+        >
+          {{ hint()?.message ?? "" | translate : hint()?.params }}
+        </span>
+      </div>
+    </mat-hint>
+    }
+  </div>
+</div>

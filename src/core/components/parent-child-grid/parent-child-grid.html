@@ -1,0 +1,446 @@
+@if (dataGridGroup().childGridInfo && dataGridGroup().childGridInfo.length > 0)
+{ @if(isParentChildHorizontalSplitter()){
+<acty-splitter
+  #parentChildSplitter
+  direction="vertical"
+  class="custom-splitter"
+  (sizeChange)="onSizeChange($event)"
+>
+  <div
+    acty-split-panel
+    class="filter-panel"
+    #filterContainer
+    [minSize]="firstPanelMinSize"
+  >
+    <div class="dataDiv">
+
+      @if(dataGridGroup().gridFormat === "treeview"){ 
+        <acty-treeview-grid
+          #treegridComponent
+          [dataGrid]="dataGridGroup().dataGrid"
+          [formId]="formId() || ''"
+          [gridId]="dataGridGroup().gridId"
+          [GridMenuBtns]="dataGridGroup().gridButtons"
+          (onTreeviewChanges)="onValueChangesforTreeView($event)"
+          [isTriggerRefscreenofTreeviw]="isTriggerRefscreenofTreeviw()"
+          [GeneralBtns]="GeneralBtns()"
+          [buttonOrder]="buttonOrder()"
+          [ignoreButtonSetting]="ignoreButtonSetting()"
+          [isParentChild]="true"
+          [dataListInp]="gridDataList"
+          [screenName]="screenName()"
+          [parentColumnDatafield]="dataGridGroup().treeViewGridInfo[0].parentColumnDatafield"
+          [childColumnDatafield]="dataGridGroup().treeViewGridInfo[0].childColumnDatafield"
+          [initialExpandAll]="dataGridGroup().treeViewGridInfo[0].initialExpandAll"
+          seperator=" : "
+          (onClickSaveBtn)="saveData()"
+          (SelecteChange)="onSelecteChange($event)"
+          [selectionMode]="dataGridGroup().selectionMode || 'single'">
+        </acty-treeview-grid>
+      }
+      @else {
+      <acty-grid
+        #gridComponent
+        [dataGrid]="dataGridGroup().dataGrid"
+        [blockRowSelectionChange]="blockRowSelectionChange"
+        [getDataUrl]="''"
+        [searchList]="searchList()"
+        [screenName]="screenName()"
+        [apiObjectName]="dataGridGroup().apiObjectName"
+        [relationList]="relationWithMainParentList"
+        [currPkData]="currPkData()"
+        [getDataMethod]="getDataMethod()"
+        [GridMenuBtns]="dataGridGroup().gridButtons"
+        [GeneralBtns]="GeneralBtns()"
+        [isEditableGrid]="dataGridGroup().isEditableGrid"
+        [userId]="userId"
+        [formLoaderKey]="''"
+        [isActiveGrid]="
+          activeGridId() === dataGridGroup().gridId ? true : false
+        "
+        [formId]="formId() || ''"
+        [dataListInp]="gridDataList"
+        [showPaginator]="dataGridGroup().showPaginator"
+        [pageSizes]="dataGridGroup().pageSizes"
+        [gridId]="dataGridGroup().gridId"
+        [buttonOrder]="buttonOrder()"
+        [isButtonDisabledInp]="isButtonDisabledFn"
+        [detailViewTab]="dataGridGroup().detailViewTabs"
+        (SelecteChange)="onSelecteChange($event)"
+        (onGridCellChanges)="onValueChanges($event, dataGridGroup().gridId)"
+        (deleteValues)="onRowDeleted($event)"
+        (addedValues)="onRowAdded($event)"
+        (pasteRowValue)="onRowAdded($event)"
+        (onClickSaveBtn)="saveData()"
+        (onCellFocusChange)="onCellFocusChangeByChild($event)"
+        (addNewGridRow)="addChildNewGridRow($event)"
+        (onButtonClicked)="buttonClicked($event)"
+        [gridFormat]="dataGridGroup().gridFormat || 'normal'"
+        [stickyHeader]="dataGridGroup().stickyLabel"
+        [selectionMode]="dataGridGroup().selectionMode || 'single'"
+        [resizableCols]="dataGridGroup().resizableCols"
+        [letParentMaintainCellChanges]="true"
+        [letParentMaintainButtonClicks]="true"
+        (click)="clickOnGrid(this.dataGridGroup().gridId)"
+        (triggerGetdata)="triggerGetdata()"
+        [showGridButtonContainer]="true"
+        [isParentChild]="true"
+        [isParentChildHorizontalSplitter]="isParentChildHorizontalSplitter()"
+        [isAllDataLoad]="!isParentGrid()"
+        [ignoreButtonSetting]="ignoreButtonSetting()"
+        (parentChildGetData)="triggerParentChildGetData($event)"        
+        (onGridActionRequest)="this.onGridActionRequest.emit($event)" 
+        [skipMasterFilterValidation]="skipMasterFilterValidation()"        
+        [hasInitialLoad]="hasInitialLoad()"     
+        [referenceDefaultValueColNames] = "referenceDefaultValueColNames()"  
+        [tabId]="tabId()"
+        [addTotalRow]="dataGridGroup().addTotalRow || false"
+      ></acty-grid>
+      }
+    </div>
+  </div>
+  <div acty-split-panel class="dataDiv" #parentChildGridWrapper [minSize]="allPanelMinDrag">
+    @if (dataGridGroup().childGridInfo) {
+    <div class="flex-container">
+      <acty-splitter
+        #parentChildSplitter
+        direction="vertical"
+        style="width: 100%; height: 100%"
+        (sizeChange)="onVerticalplitterSizeChange($event)"
+      >
+        @for (row of groupedRows; track $index; let rowindex = $index) {
+        <div
+          class="row-wrapper"
+          acty-split-panel
+          [style]="'height:' + 100 / groupedRows.length + '%'"
+          [minSize]="firstPanelMinSize"
+        >
+          <acty-splitter
+            #parentChildSplitter
+            direction="horizontal"
+            style="width: 100%; height: 100%"
+            (sizeChange)="onSplitterSizeChange($index, $event)"
+          >
+            @for (childItem of row; track childItem.id || $index;) {
+            <div
+              acty-split-panel
+            >
+              <acty-parent-child-grid
+                class="flex-item"
+                [dataGridGroup]="childItem"
+                [dataListGroupInp]="dataListGroup()"
+                [_dataListGroupInp]="_dataListGroup()"
+                [isParentGrid]="false"
+                [SelectionChange]="rowSelectionChanges"
+                [spitterHeigth]="SpitterHeigthChange"
+                [searchList]="searchList()"
+                [screenName]="screenName()"
+                [currPkData]="currPkData()"
+                [getDataMethod]="getDataMethod()"
+                [formId]="formId()"
+                [GeneralBtns]="GeneralBtns()"
+                [selectedGroup]="selectedGroup()"
+                [parentChildBtnOrder]="parentChildBtnOrder()"
+                [uniqueGridIdListInp]="uniqueGridIdListValue"
+                [allGridRelationManagerListInp]="allGridRelationManagerList"
+                [relationWithMainParentListInp]="relationWithMainParentList"
+                [invalidRowSelection]="inValidRowOfGridWithRowId"
+                (uniqueDisableListInpChange)="
+                  uniqueDisableListInpValueChange($event)
+                "
+                (onGridCellChanges)="onGridCellChangesByChild($event)"
+                (onCellFocusChange)="onCellFocusChangeByChild($event)"
+                (addNewGridRow)="addChildNewGridRow($event)"
+                (onGridRowDelete)="onRowDeleteByChild($event)"
+                (onButtonClicked)="onButtonClick($event)"
+                (callingGridButton)="onClickPCGridButton($event)"
+                [activeGridId]="activeGridId()"
+                [triggerUpdateScollHeigthInp]="triggerUpdateScollHeigth"
+                [isupdatedChildInp]="isupdatedChild"
+                [isParentChildHorizontalSplitter]="isParentChildHorizontalSplitter()"
+                [ignoreButtonSetting]="ignoreButtonSetting()"
+                (activeGridIdChange)="activeGridChangeByParent($event)"
+                (childRowContainError)="emitFromChildForSelectedParentRow($event)"
+                (requestFilterValue)="getFilterData()"
+                [hasInitialLoad]="hasInitialLoad()"
+                [referenceDefaultValueColNames] = "referenceDefaultValueColNames()"
+                [tabId]="tabId()"
+                (triggerGetdataCall)="triggerGetdata()"
+              ></acty-parent-child-grid>
+            </div>
+            }
+          </acty-splitter>
+        </div>
+        }
+      </acty-splitter>
+    </div>
+    }
+  </div>
+    @if(isGeneralWrapperVisible == true && this.GeneralBtns().length){
+    <div class="screen-buttons">
+      <div class="left-buttons-container">
+        <acty-button-wrapper #buttonWrapper [buttons]="this.GeneralBtns()" [defaultVisibleCount]="this.GeneralBtns().length"
+          [formId]="formId()" [childFormId]="'GeneralButtons'" [buttonOrder]="generalButtonOrder()"
+          (buttonClicked)="generalButtonClicked($event)" (extraButtonClicked)="
+              extraButtonClicked($event.btnId, $event.subAction)"
+              (visibleButtonChanged)="updateAllGridScrollHeight()">
+        </acty-button-wrapper>
+      </div>
+    </div>
+    }
+</acty-splitter>
+} @else {
+<div
+  acty-split-panel
+  class="filter-panel"
+  #filterContainer
+>
+  <div class="dataDiv">
+    @if(dataGridGroup().gridFormat === "treeview"){
+       <acty-treeview-grid
+          #treegridComponent
+          [dataGrid]="dataGridGroup().dataGrid"
+          [formId]="formId() || ''"
+          [gridId]="dataGridGroup().gridId"
+          [isTriggerRefscreenofTreeviw]="isTriggerRefscreenofTreeviw()"
+          [GridMenuBtns]="dataGridGroup().gridButtons"
+          (onTreeviewChanges)="onValueChangesforTreeView($event)"
+          [GeneralBtns]="GeneralBtns()"
+          [buttonOrder]="buttonOrder()"
+          [ignoreButtonSetting]="ignoreButtonSetting()"
+          [isParentChild]="true"
+          [dataListInp]="gridDataList"
+          [screenName]="screenName()"
+          [parentColumnDatafield]="dataGridGroup().treeViewGridInfo[0].parentColumnDatafield"
+          [childColumnDatafield]="dataGridGroup().treeViewGridInfo[0].childColumnDatafield"
+          [initialExpandAll]="dataGridGroup().treeViewGridInfo[0].initialExpandAll"
+          seperator=" : "
+          (onClickSaveBtn)="saveData()"
+          (SelecteChange)="onSelecteChange($event)"
+          [selectionMode]="dataGridGroup().selectionMode || 'single'">
+        </acty-treeview-grid>
+     }
+    @else {
+        <acty-grid
+          #gridComponent
+          [dataGrid]="dataGridGroup().dataGrid"
+          [blockRowSelectionChange]="blockRowSelectionChange"
+          [getDataUrl]="''"
+          [searchList]="searchList()"
+          [screenName]="screenName()"
+          [apiObjectName]="dataGridGroup().apiObjectName"
+          [relationList]="relationWithMainParentList"
+          [currPkData]="currPkData()"
+          [getDataMethod]="getDataMethod()"
+          [GridMenuBtns]="dataGridGroup().gridButtons"
+          [GeneralBtns]="GeneralBtns()"
+          [isEditableGrid]="dataGridGroup().isEditableGrid"
+          [userId]="userId"
+          [formLoaderKey]="''"
+          [isActiveGrid]="activeGridId() === dataGridGroup().gridId ? true : false"
+          [formId]="formId() || ''"
+          [dataListInp]="gridDataList"
+          [showPaginator]="dataGridGroup().showPaginator"
+          [pageSizes]="dataGridGroup().pageSizes"
+          [gridId]="dataGridGroup().gridId"
+          [buttonOrder]="buttonOrder()"
+          [selectionMode]="dataGridGroup().selectionMode || 'single'"
+          [isButtonDisabledInp]="isButtonDisabledFn"
+          [detailViewTab]="dataGridGroup().detailViewTabs"
+          [ignoreButtonSetting]="ignoreButtonSetting()"
+          (SelecteChange)="onSelecteChange($event)"
+          (onGridCellChanges)="onValueChanges($event, dataGridGroup().gridId)"
+          (deleteValues)="onRowDeleted($event)"
+          (addedValues)="onRowAdded($event)"
+          (pasteRowValue)="onRowAdded($event)"
+          (onClickSaveBtn)="saveData()"
+          (onCellFocusChange)="onCellFocusChangeByChild($event)"
+          (addNewGridRow)="addChildNewGridRow($event)"
+          (onButtonClicked)="buttonClicked($event)"
+          [gridFormat]="dataGridGroup().gridFormat || 'normal'"
+          [stickyHeader]="dataGridGroup().stickyLabel"
+          [resizableCols]="dataGridGroup().resizableCols"
+          [letParentMaintainCellChanges]="true"
+          [letParentMaintainButtonClicks]="true"
+          (click)="clickOnGrid(this.dataGridGroup().gridId)"
+          (triggerGetdata)="triggerGetdata()"
+          [showGridButtonContainer]="true"
+          [isParentChild]="true"
+          [isParentChildHorizontalSplitter]="isParentChildHorizontalSplitter()"
+          [isAllDataLoad]="!isParentGrid()"  
+          (parentChildGetData)="triggerParentChildGetData($event)"  
+          (onGridActionRequest)="this.onGridActionRequest.emit($event)"  
+          [skipMasterFilterValidation]="skipMasterFilterValidation()"
+          [hasInitialLoad]="hasInitialLoad()"
+          [referenceDefaultValueColNames] = "referenceDefaultValueColNames()"
+          [tabId]="tabId()"
+          [addTotalRow]="dataGridGroup().addTotalRow || false"
+        ></acty-grid>
+    }
+
+  </div>
+</div>
+<div acty-split-panel class="dataDiv" #parentChildGridWrapper>
+  @if (dataGridGroup().childGridInfo) {
+  <div class="flex-container">
+    @for (row of groupedRows; track $index; let rowindex = $index) {
+    <div
+      class="row-wrapper"
+      [style]="'height:' + 100 / groupedRows.length + '%'"
+    >
+      <acty-splitter
+        #parentChildSplitter
+        direction="horizontal"
+        style="width: 100%; height: 100%"
+        (sizeChange)="onSplitterSizeChange($index, $event)"
+      >
+        @for (childItem of row; track childItem.id || $index;) {
+        <div
+          acty-split-panel
+        >
+          <acty-parent-child-grid
+            class="flex-item"
+            [dataGridGroup]="childItem"
+            [dataListGroupInp]="dataListGroup()"
+            [_dataListGroupInp]="_dataListGroup()"
+            [isParentGrid]="false"
+            [SelectionChange]="rowSelectionChanges"
+            [spitterHeigth]="SpitterHeigthChange"
+            [screenName]="screenName()"
+            [searchList]="searchList()"
+            [currPkData]="currPkData()"
+            [getDataMethod]="getDataMethod()"
+            [formId]="formId()"
+            [GeneralBtns]="GeneralBtns()"
+            [parentChildBtnOrder]="parentChildBtnOrder()"
+            [selectedGroup]="selectedGroup()"
+            [uniqueGridIdListInp]="uniqueGridIdListValue"
+            [allGridRelationManagerListInp]="allGridRelationManagerList"
+            [relationWithMainParentListInp]="relationWithMainParentList"
+            [invalidRowSelection]="inValidRowOfGridWithRowId"
+            [ignoreButtonSetting]="ignoreButtonSetting()"
+            (uniqueDisableListInpChange)="
+              uniqueDisableListInpValueChange($event)
+            "
+            (onGridCellChanges)="onGridCellChangesByChild($event)"
+            (onCellFocusChange)="onCellFocusChangeByChild($event)"
+            (addNewGridRow)="addChildNewGridRow($event)"
+            (onButtonClicked)="onButtonClick($event)"
+            (callingGridButton)="onClickPCGridButton($event)"
+            [activeGridId]="activeGridId()"
+            [triggerUpdateScollHeigthInp]="triggerUpdateScollHeigth"
+            [isupdatedChildInp]="isupdatedChild"
+            [isParentChildHorizontalSplitter]="isParentChildHorizontalSplitter()"
+            (activeGridIdChange)="activeGridChangeByParent($event)"
+            (childRowContainError)="emitFromChildForSelectedParentRow($event)"
+            [hasInitialLoad]="hasInitialLoad()"
+            (requestFilterValue)="getFilterData()"
+            [referenceDefaultValueColNames] = "referenceDefaultValueColNames()"
+            [tabId]="tabId()"
+            (triggerGetdataCall)="triggerGetdata()"
+          ></acty-parent-child-grid>
+        </div>
+        }
+      </acty-splitter>
+    </div>
+    }
+  </div>
+  }
+</div>
+  @if(isGeneralWrapperVisible == true && this.GeneralBtns().length){
+    <div class="screen-buttons">
+      <div class="left-buttons-container">
+        <acty-button-wrapper #buttonWrapper [buttons]="this.GeneralBtns()" [defaultVisibleCount]="this.GeneralBtns().length"
+          [formId]="formId()" [childFormId]="'GeneralButtons'" [buttonOrder]="generalButtonOrder()"
+          (buttonClicked)="generalButtonClicked($event)" (extraButtonClicked)="
+              extraButtonClicked($event.btnId, $event.subAction)"
+              (visibleButtonChanged)="updateAllGridScrollHeight()">
+        </acty-button-wrapper>
+      </div>
+    </div>
+    }
+} }@else {
+<div class="dataDiv">
+  @if(dataGridGroup().gridFormat === "treeview"){
+     <acty-treeview-grid
+          #treegridComponent
+          [dataGrid]="dataGridGroup().dataGrid"
+          [formId]="formId() || ''"
+          [gridId]="dataGridGroup().gridId"
+          [GridMenuBtns]="dataGridGroup().gridButtons"
+          (onTreeviewChanges)="onValueChangesforTreeView($event)"
+          [isTriggerRefscreenofTreeviw]="isTriggerRefscreenofTreeviw()"
+          [GeneralBtns]="GeneralBtns()"
+          [buttonOrder]="buttonOrder()"
+          [ignoreButtonSetting]="ignoreButtonSetting()"
+          [isParentChild]="true"
+          [dataListInp]="gridDataList"
+          [screenName]="screenName()"
+          [parentColumnDatafield]="dataGridGroup().treeViewGridInfo[0].parentColumnDatafield"
+          [childColumnDatafield]="dataGridGroup().treeViewGridInfo[0].childColumnDatafield"
+          [initialExpandAll]="dataGridGroup().treeViewGridInfo[0].initialExpandAll"
+          seperator=" : "
+          (onClickSaveBtn)="saveData()"
+          (SelecteChange)="onSelecteChange($event)"
+          [selectionMode]="dataGridGroup().selectionMode || 'single'">
+        </acty-treeview-grid>
+   }
+  @else {
+      <acty-grid
+    #gridComponent
+    [dataGrid]="dataGridGroup().dataGrid"
+    [blockRowSelectionChange]="blockRowSelectionChange"
+    [getDataUrl]="''"
+    [searchList]="searchList()"
+    [screenName]="screenName()"
+    [apiObjectName]="dataGridGroup().apiObjectName"
+    [currPkData]="currPkData()"
+    [getDataMethod]="getDataMethod()"
+    [relationList]="relationWithMainParentList"
+    [GridMenuBtns]="dataGridGroup().gridButtons"
+    [GeneralBtns]="GeneralBtns()"
+    [isEditableGrid]="dataGridGroup().isEditableGrid"
+    [userId]="userId"
+    [formLoaderKey]="''"
+    [selectionMode]="dataGridGroup().selectionMode || 'single'"
+    [formId]="formId() || ''"
+    [gridId]="dataGridGroup().gridId"
+    [buttonOrder]="buttonOrder()"
+    [isActiveGrid]="activeGridId() === dataGridGroup().gridId ? true : false"
+    [isButtonDisabledInp]="isButtonDisabledFn"
+    [dataListInp]="gridDataList"
+    [showPaginator]="dataGridGroup().showPaginator"
+    [pageSizes]="dataGridGroup().pageSizes"
+    [detailViewTab]="dataGridGroup().detailViewTabs"
+    [ignoreButtonSetting]="ignoreButtonSetting()"
+    (SelecteChange)="onSelecteChange($event)"
+    (onGridCellChanges)="onValueChanges($event, dataGridGroup().gridId)"
+    (deleteValues)="onRowDeleted($event)"
+    (addedValues)="onRowAdded($event)"
+    (pasteRowValue)="onRowAdded($event)"
+    (onClickSaveBtn)="saveData()"
+    (onCellFocusChange)="onCellFocusChangeByChild($event)"
+    (addNewGridRow)="addChildNewGridRow($event)"
+    [gridFormat]="dataGridGroup().gridFormat || 'normal'"
+    [stickyHeader]="dataGridGroup().stickyLabel"
+    (onButtonClicked)="buttonClicked($event)"
+    [resizableCols]="dataGridGroup().resizableCols"
+    [letParentMaintainCellChanges]="true"
+    [letParentMaintainButtonClicks]="true"
+    (click)="clickOnGrid(this.dataGridGroup().gridId)"
+    (triggerGetdata)="triggerGetdata()"
+    [showGridButtonContainer]="true"
+    [isParentChild]="true"
+    [isParentChildHorizontalSplitter]="isParentChildHorizontalSplitter()"
+    [isAllDataLoad]="!isParentGrid()"
+    (parentChildGetData)="triggerParentChildGetData($event)"    
+    (onGridActionRequest)="this.onGridActionRequest.emit($event)"
+    [skipMasterFilterValidation]="skipMasterFilterValidation()"    
+    [hasInitialLoad]="hasInitialLoad()"   
+    [referenceDefaultValueColNames] = "referenceDefaultValueColNames()" 
+    [tabId]="tabId()"
+    [addTotalRow]="dataGridGroup().addTotalRow || false"
+  ></acty-grid>
+  }
+</div>
+}

@@ -1,0 +1,2085 @@
+<div #actyGrid class="acty-grid" style="width : 100%">
+  <div
+    #tableContainer
+    class="table-container"
+    [class]="
+      (isEditableGrid()
+        ? ' editableGrid-table-container'
+        : ' readonlyGrid-table-container') +
+        (isActiveGrid()  ? ' active-grid' : '')
+    "
+  >
+    <table
+      #actyGridTable
+      mat-table
+      actyFieldHighlight
+      [dataSource]="visibleDataList"
+      class="mat-elevation-z2 form-field-small acty-grid-table"
+      [class.acty-tabular-grid-table]="gridFormat() !== 'normal' ?true:false "
+      [ngStyle]="{
+        'user-select': isCellModeEnabled() ? 'none' : null,
+      }"
+    >
+      @if(gridFormat() === 'normal'){
+      <ng-container matColumnDef="no" sticky>
+        <th mat-header-cell
+          *matHeaderCellDef
+          [attr.rowspan]="getMaxHeaderDepth()"
+          class="indexColumn" sticky>
+          No.
+        </th>
+        <td mat-cell *matCellDef="let row; let i = index" class="indexColumn">
+          @if(row.isTotalRow){
+            {{'CORE.GRID.TotalRow' | translate}}
+          }@else if(isFooterVisible){
+          {{ paginator.pageIndex * paginator.pageSize + i + 1 }}
+          }@else {
+          {{ i + 1 }}
+          }
+        </td>
+      </ng-container>
+
+      @if(selectionMode() === 'multiple'){
+      <ng-container matColumnDef="select" sticky>
+        <th mat-header-cell
+          *matHeaderCellDef
+          [attr.rowspan]="getMaxHeaderDepth()"
+          class="indexColumn" sticky>
+          <acty-check-box
+            [align]="'before'"
+            [showParent]="false"
+            [isChecked]="selection().hasValue() && isAllSelected()"
+            (change)="toggleAllRows($event)"
+            [indeterminate]="selection().hasValue() && !isAllSelected()"
+          >
+          </acty-check-box>
+        </th>
+        <td mat-cell *matCellDef="let row" class="multiSelectColumn">
+          <acty-check-box
+            [align]="'before'"
+            [showParent]="false"
+            [isChecked]="selection().isSelected(row.rowid)"
+            (change)="onCheckboxChangeOfMultiSelection(row.rowid, $event)"
+            (click)="$event.stopPropagation()"
+          >
+          </acty-check-box>
+        </td>
+      </ng-container>
+      }
+      <ng-container matColumnDef="actions" sticky>
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          class="grid-cell grid-header"
+          sticky
+        >
+          Actions
+        </th>
+        <td mat-cell *matCellDef="let row; let i = index" class="grid-cell">
+          <div style="display: flex; gap: 0.5rem">
+            <acty-button [type]="'icon-outlined'" [severity]="'info'"  [leftIcon]="'arrow_outward'" (click)="onGridActions('redirect', row)" />
+
+            @if(userId() == row.userid){
+            <acty-button [type]="'icon-outlined'" [severity]="'primary'"  [leftIcon]="'edit'"(click)="onGridActions('edit', row)" />
+            <acty-button [type]="'icon-outlined'" [severity]="'danger'"  [leftIcon]="'delete'"(click)="onGridActions('delete', row)" />
+            }
+          </div>
+        </td>
+      </ng-container>
+      @for (column of _dataGrid(); track $index) {
+      <ng-container
+        [matColumnDef]="column.dataField"
+        [sticky]="getColumnisSticky(column)"
+      >
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          [attr.colspan]="getColSpan(column)"
+          [attr.rowspan]="isLeafColumn(column) ? getMaxHeaderDepth() : 1"
+          [attr.data-label-for]="column.dataField"
+          [class]="
+            'grid-cell grid-header cursor-pointer mat-column-' +
+            column.dataField +
+            (isEditableColumn(column) ? ' editable-column' : '') +
+            (isRequiredColumn(column) ? ' required-column-header' : '') +
+            (hasSuffixIcon(column) ? ' icon-cell-header' : '')
+          "
+        >
+          <div class="column-header-container">
+            <span
+              [class]="'column-header-name'"
+              [matTooltip]="column.caption | translate"
+              actyShowTooltipIfTruncated
+            >
+              {{ column.caption | translate }}
+            </span>
+            @if(showGridOperationBtns){
+            <div class="column-header-button-container">
+              @if (!column.childColumns?.length) {
+              @if(column.IsSortable){
+              <acty-button
+                type="icon"
+                [leftIcon]="getSortIcon(column.dataField)"
+                (clicked)="sortData(column.dataField)"
+              />
+              } @if(isFilterable(column)){
+              <acty-button
+                #filterMenuTrigger="matMenuTrigger"
+                type="icon"
+                leftIcon="filter_alt"
+                [matMenuTriggerFor]="filterMenu"
+              />
+              <mat-menu #filterMenu="matMenu" class="grid-filter-menu-panel">
+                <div
+                  matMenuContent
+                  class="grid-filter-menu-div"
+                  (click)="$event.stopPropagation()"
+                >
+                  @let filterState = getColumnFilterState(column.dataField);
+                  @let columnobj = (column); @if(columnobj &&
+                  (columnobj?.editorType === '4' || columnobj?.editorType === '5'  || columnobj?.editorType === '6' || columnobj?.editorType === '7')){
+                  <acty-multiselect
+                    [options]="
+                      getGridFilterMultiselectoptions(column.dataField)
+                    "
+                    [maxSelectedLabels]="1"
+                    [(value)]="filterState.rules[0].value"
+                    [styleClass]="'grid-filter-multiselect'"
+                  />
+                  } @else {
+                  <div class="grid-filter-field">
+                    <acty-dropdown
+                      [dataSource]="columnFilterType" [displayExpr]="'displayExpr'"
+                      [valueExpr]="'valueExpr'" [isSearch]="false" [isNullable]="false"
+                      [selectedValue]="filterState.matchMode" (selectionChange)="filterState.matchMode = $event"
+                    >
+                    </acty-dropdown>
+                  </div>
+
+                  <div class="grid-filter-rules-block filter-rules-div">
+                    @for (rule of filterState.rules; let i = $index; track i) {
+                    <div class="filter-state-rule"
+                      [class.border-bottom]="
+                        filterState.rules.length > 1 && !$last
+                      "
+                    >
+                      <div class="small grid-filter-rule-select">
+                        <acty-dropdown [dataSource]="getColumnFilterRuleOptions(column)" [displayExpr]="'display'" [valueExpr]="'value'"
+                          [isSearch]="false" [isNullable]="false" [selectedValue]="rule.condition"
+                          (selectionChange)="rule.condition = $event">
+                        </acty-dropdown>
+                      </div>
+
+                      @if(columnobj?.editorType === '3'){
+
+                      <acty-date-time
+                        [dateFormat]="column.dateFormat"
+                        type="date"
+                        [(ngModel)]="rule.value"
+                      >
+                      </acty-date-time>
+                      } @else {
+                        <acty-textinput [(ngModel)]="rule.value" (keyup.enter)="applyFilter()"></acty-textinput>
+                      } @if(filterState.rules.length > 1){
+                      <acty-button
+                        type="text"
+                        severity="danger"
+                        leftIcon="delete"
+                        text="CORE.GRID.FilterMatchConditions.RemoveRule"
+                        btnClass="grid-filter-rule-delete"
+                        (clicked)="removeRule(column.dataField, i)"
+                      />
+                      }
+                    </div>
+                    }
+                  </div>
+
+                  @if(filterState.rules.length < 2){
+                  <acty-button
+                    type="text"
+                    severity="primary"
+                    leftIcon="add"
+                    [text]="
+                      'CORE.GRID.FilterMatchConditions.AddRule' | translate
+                    "
+                    btnClass="grid-filter-rule-add"
+                    (clicked)="addRule(column)"
+                  />
+                  } }
+                  <div class="grid-filter-bottom-btn-container">
+                    <acty-button
+                      [text]="
+                        'CORE.GRID.FilterMatchConditions.Clear' | translate
+                      "
+                      type="outlined"
+                      severity="primary"
+                      class="grid-filter-rules-clear"
+                      (clicked)="
+                        clearFilterAndCloseMenu(column, filterMenuTrigger)
+                      "
+                    />
+                    <acty-button
+                      [text]="'CORE.GRID.ApplyBtn' | translate"
+                      type="filled"
+                      severity="primary"
+                      class="grid-filter-rules-apply"
+                      (clicked)="applyFilterAndCloseMenu(column, filterMenuTrigger)"
+                    />
+                  </div>
+                </div>
+              </mat-menu>
+              }}
+            </div>
+            }
+          </div>
+          @if(resizableCols()){
+          <div
+            class="resizer"
+            (mousedown)="onColumnResizeStart($event, column.dataField)"
+          ></div>
+          }
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let row; let i = index"
+          [class.selected-cell]="
+            isSelectedCell(i, column.dataField) && !isEditableGrid()
+          "
+          (mousedown)="onCellClick(row, column, i, $event)"
+          (mouseenter)="onCellMouseEnter(i, column)"
+          [class]="
+            'grid-cell mat-column-' +
+            column.dataField +
+            (isEditableColumn(column) && isPrimaryColumnOfNewRow(column, row) && !row?.childOperations?.disabledFields?.includes(column.dataField)
+              ? ' editable-column'
+              : '') +
+            (isCellUpdated(column.dataField, row) ? ' updatedCell' : '') +
+            (hasColumnError(column, row) ? ' errorCell' : '') +
+            (isRequireColumnContainData(column, row)
+              ? ' grid-require-column grid-require-column-td'
+              : '') +
+            (isInvalidCell(row, column.dataField) ? ' show-hint' : '') +
+            (hasSuffixIcon(column) ? ' icon-cell' : '')
+          "
+        >
+        @if (column?.editorType === '1' ) {
+          <!-- String -->
+          @if (isEditableCell(column,row) && isPrimaryColumnOfNewRow(column,
+          row) && !row?.childOperations?.disabledFields?.includes(column.dataField)) {
+          <acty-textinput
+            actySelectOnFocus
+            [attr.data-input-for]="column.dataField"
+            [style]="'text-align :' + column.alignment"
+            class="grid-edit-data"
+            [attr.data-col]="column.dataField"
+            [attr.grid-id]="gridId()"
+            [class.grid-require-column]="
+              isRequireColumnContainData(column, row)
+            "
+            [(ngModel)]="row[column.dataField]"
+            (ngModelChange)="
+              row[column.dataField] = $event; onRowDataUpdate(row, column)
+            "
+            [maxLength]="getColumnMaxLength(column)"
+            [hint]="getInvalidMessage(row, column.dataField)"
+            (hintChange)="onInputInternalHintChange($event, row, column)"
+            (change)="onInputFinished(row, column)"
+            (valueChanged)="onInputFinished(row, column, true)"
+            [type]="column.isProtected ? 'password' : 'text'"
+            [hide]="isPasswordHidden(row, row.rowid, column.dataField)"
+            (hideChange)="setPasswordHidden(row, row.rowid, column.dataField, $event)"
+            #focusableCell
+          >
+            @if(isReferenceScreenAvailable(column)){
+            <acty-reference-screen-button
+              suffix-button
+              [referenceScreenId]="getReferencesTableName(column)"
+              [rowId]="row.rowid"
+              class="icons reference-button"
+              [refForColumn]="column.dataField"
+              [selectedValue]="row[column.dataField]"
+              [refRelations]="column.refRelations ?? []"
+              [formId]="formId()"
+              [userId]="userId()"
+              [gridId]="gridId()"
+              [tabId]="tabId()"
+              [gridRefData]="refScreenOnRowData()"
+              (referenceSelected)="onReferenceDataSelected($event, row)"
+            />
+            }
+          </acty-textinput>
+          } @else {
+          <div class="grid-display-data" [attr.data-col]="column.dataField" [attr.grid-id]="gridId()">
+            <span
+              [style]="'text-align :' + column.alignment"
+              [matTooltip]="column.isProtected ? '•••••' : row[column.dataField]"
+              actyShowTooltipIfTruncated
+            >
+              {{ column.isProtected ? '•••••' : row[column.dataField] }}
+            </span>
+            @if(isReferenceScreenAvailable(column) && column.isEditable &&
+            !isAutoGenerateColumn(column) && isEditableGrid() && isPrimaryColumnOfNewRow(column, row)
+            && !row?.childOperations?.disabledFields?.includes(column.dataField)){
+            <acty-reference-screen-button
+              suffix-button
+              [referenceScreenId]="getReferencesTableName(column)"
+              [rowId]="row.rowid"
+              class="icons reference-button"
+              [refForColumn]="column.dataField"
+              [selectedValue]="row[column.dataField]"
+              [refRelations]="column.refRelations ?? []"
+              [formId]="formId()"
+              [userId]="userId()"
+              [gridId]="gridId()"
+              [tabId]="tabId()"
+              (referenceSelected)="onReferenceDataSelected($event, row)"
+            />
+            }
+            @if(isEditableGrid() && column.isEditable && !row?.childOperations?.disabledFields?.includes(column.dataField) && column.isProtected === true){
+              <acty-button
+              suffix-button
+              class="icons reference-button"
+              [type]="'icon'"
+              variant="text"
+              [leftIcon]="isPasswordHidden(row, row.rowId, column.dataField) ? 'visibility_off' : 'visibility'"
+              (click)="toggleGridPassword(row, row.rowId, column.dataField, $event)"
+              class="reference-acty-button"            
+            />
+            }
+          </div>
+          <div class="text-input-hint">
+            @if (getInvalidMessage(row, column.dataField) &&
+            getInvalidMessage(row, column.dataField)?.message) {
+            <div
+              [class]="'cell-show-hint-' + getHintType(row, column.dataField)"
+            >
+              <div class="hint-container">
+                <div>
+                  <mat-icon>{{ getHintIcon(row, column.dataField) }}</mat-icon>
+                </div>
+                <span
+                  [matTooltip]="
+                    getInvalidMessage(row, column.dataField)?.message ?? ''
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  "
+                  [matTooltipClass]="
+                    'acty-tooltip-' + getHintType(row, column.dataField)
+                  "
+                  actyShowTooltipIfTruncated
+                >
+                  {{
+                    getInvalidMessage(row, column.dataField)?.message ?? ""
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  }}
+                </span>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        }
+        @else if (column?.editorType === '2') {
+           @if (isEditableCell(column,row) &&
+          isPrimaryColumnOfNewRow(column, row) && !row?.childOperations?.disabledFields?.includes(column.dataField)) {
+          <acty-numberinput
+            actySelectOnFocus
+            [attr.data-col]="column.dataField"
+            [attr.grid-id]="gridId()"
+            [attr.data-input-for]="column.dataField"
+            [showButtons] = "column.isSpinButton ? column.isSpinButton : false"
+            [maxValue]="column.maxValue"
+            [minValue]="column.minValue"
+            [dataPrecision]="column.dataPrecision"
+            [dataScale]="column.dataScale  ?? 3"
+            [style.text-align]="column.alignment"
+            class="grid-edit-data"
+            [class.grid-require-column]="
+              isRequireColumnContainData(column, row)
+            "
+            [(ngModel)]="row[column.dataField]"
+            (ngModelChange)="
+              row[column.dataField] = $event; onRowDataUpdate(row, column)
+            "
+            [hint]="getInvalidMessage(row, column.dataField)"
+            (hintChange)="onInputInternalHintChange($event, row, column)"
+            (change)="onInputFinished(row, column)"
+            (valueChanged)="onInputFinished(row, column)"
+            #focusableCell
+          >
+          @if(isReferenceScreenAvailable(column) && column.isEditable &&
+            !isAutoGenerateColumn(column) && isEditableGrid() && isPrimaryColumnOfNewRow(column, row)
+            && !row?.childOperations?.disabledFields?.includes(column.dataField)){        
+                      <acty-reference-screen-button
+                        suffix-button
+                        [referenceScreenId]="getReferencesTableName(column)"
+                        [rowId]="row.rowid"
+                        class="icons reference-button"
+                        [refForColumn]="column.dataField"
+                        [selectedValue]="row[column.dataField]"
+                        [refRelations]="column.refRelations ?? []"
+                        [formId]="formId()"
+                        [userId]="userId()"
+                        [gridId]="gridId()"
+                        [tabId]="tabId()"
+                        [gridRefData]="refScreenOnRowData()"
+                        (referenceSelected)="onReferenceDataSelected($event, row)"
+                      />
+                      }
+          </acty-numberinput>
+          }@else {
+          <div class="grid-display-data" [attr.data-col]="column.dataField" [attr.grid-id]="gridId()">
+            <span
+              [style]="'text-align :' + column.alignment"
+              [matTooltip]="row[column.dataField]"
+              actyShowTooltipIfTruncated
+            >
+              {{ row[column.dataField]  | actyNumber:translate.currentLang}}
+            </span>
+             @if(isReferenceScreenAvailable(column) && column.isEditable &&
+            !isAutoGenerateColumn(column) && isEditableGrid() && isPrimaryColumnOfNewRow(column, row)
+            && !row?.childOperations?.disabledFields?.includes(column.dataField)){
+            <acty-reference-screen-button
+              suffix-button
+              [referenceScreenId]="getReferencesTableName(column)"
+              [rowId]="row.rowid"
+              class="icons reference-button"
+              [refForColumn]="column.dataField"
+              [selectedValue]="row[column.dataField]"
+              [refRelations]="column.refRelations ?? []"
+              [formId]="formId()"
+              [userId]="userId()"
+              [gridId]="gridId()"
+              [tabId]="tabId()"
+              (referenceSelected)="onReferenceDataSelected($event, row)"
+            />
+            }
+          </div>
+          <div class="number-input-hint">
+            @if (getInvalidMessage(row, column.dataField) &&
+            getInvalidMessage(row, column.dataField)?.message) {
+            <div
+              [class]="'cell-show-hint-' + getHintType(row, column.dataField)"
+            >
+              <div class="hint-container">
+                <div>
+                  <mat-icon>{{ getHintIcon(row, column.dataField) }}</mat-icon>
+                </div>
+                <span
+                  [matTooltip]="
+                    getInvalidMessage(row, column.dataField)?.message ?? ''
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  "
+                  [matTooltipClass]="
+                    'acty-tooltip-' + getHintType(row, column.dataField)
+                  "
+                  actyShowTooltipIfTruncated
+                >
+                  {{
+                    getInvalidMessage(row, column.dataField)?.message ?? ""
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  }}
+                </span>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        }
+        @else if (column?.editorType === '3') {
+           @if (isEditableCell(column,row) &&
+          isPrimaryColumnOfNewRow(column, row) && !row?.childOperations?.disabledFields?.includes(column.dataField)) {
+          <acty-date-time
+            #dateTime
+            type="date"
+            [class]="
+              'acty-date-column-' + column.dataField + '-rowid-' + row.rowid
+            "
+            [attr.data-input-for]="column.dataField"
+            [attr.data-col]="column.dataField"
+            [attr.grid-id]="gridId()"
+            [required]="false"
+            [dateFormat]="column.dateFormat"
+            [hint]="getInvalidMessage(row, column.dataField)"
+            (hintChange)="onInputInternalHintChange($event, row, column)"
+            [(ngModel)]="row[column.dataField]"
+            (ngModelChange)="
+              onEditChange(row, column.dataField, $event);
+              onRowDataUpdate(row, column)
+            "
+            class="grid-edit-data"
+            [class.grid-require-column]="
+              isRequireColumnContainData(column, row)
+            "
+            (change)="onInputFinished(row, column)"
+            (valueChanged)="onInputFinished(row, column)"
+            #focusableCell
+          >
+          </acty-date-time>
+          }@else {
+          <div class="grid-display-data" [attr.data-col]="column.dataField" [attr.grid-id]="gridId()">
+            <span
+              [style]="'text-align :' + column.alignment"
+              [matTooltip]="
+                row[column.dataField] | actyDate : translate.currentLang :column?.dateFormat
+              "
+              actyShowTooltipIfTruncated
+            >
+              {{ row[column.dataField] | actyDate : translate.currentLang :column?.dateFormat }}
+            </span>
+            @if(isEditableGrid() && column.isEditable && !row?.childOperations?.disabledFields?.includes(column.dataField)){
+            <acty-button
+              suffix-button
+              class="icons reference-button"
+              [type]="'icon'"
+              variant="text"
+              [leftIcon]="'calendar_today'"
+              (clicked)="openCalendarPopup(row.rowid, column.dataField)"
+              class="reference-acty-button"
+            />
+            }
+          </div>
+          <div class="date-input-hint">
+            @if (getInvalidMessage(row, column.dataField) &&
+            getInvalidMessage(row, column.dataField)?.message) {
+            <div
+              [class]="'cell-show-hint-' + getHintType(row, column.dataField)"
+            >
+              <div class="hint-container">
+                <div>
+                  <mat-icon>{{ getHintIcon(row, column.dataField) }}</mat-icon>
+                </div>
+                <span
+                  [matTooltip]="
+                    getInvalidMessage(row, column.dataField)?.message ?? ''
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  "
+                  [matTooltipClass]="
+                    'acty-tooltip-' + getHintType(row, column.dataField)
+                  "
+                  actyShowTooltipIfTruncated
+                >
+                  {{
+                    getInvalidMessage(row, column.dataField)?.message ?? ""
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  }}
+                </span>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        }
+        @else if (column?.editorType === '4' || column?.editorType === '6' || column?.editorType === '7') {
+          @if (isEditableCell(column,row) &&
+          isPrimaryColumnOfNewRow(column, row) && !row?.childOperations?.disabledFields?.includes(column.dataField)) {
+          <acty-dropdown
+            #dropDown
+            [attr.data-input-for]="column.dataField"
+            [dataSource]="getDropDownData(column, row)"
+            [displayExpr]="'caption'"
+            [valueExpr]="'code'"
+            [isNullable]="false"
+            [isSearch]="false"
+            [hint]="getInvalidMessage(row, column.dataField)"
+            (hintChange)="onInputInternalHintChange($event, row, column)"
+            [required]="false"
+            [isDisabled]="false"
+            [selectedValue]="row[column.dataField]"
+            class="grid-edit-data"
+            [class.grid-require-column]="
+              isRequireColumnContainData(column, row)
+            "
+            (selectionChange)="
+              onEditChange(row, column.dataField, $event);
+              onRowDataUpdate(row, column);
+              onInputFinished(row, column);
+            "
+            (click)="$event.stopPropagation()"
+            #focusableCell
+            [class]="'acty-date-column-' + column.dataField + '-rowid-' + row.rowid"
+          >
+          </acty-dropdown>
+
+          }@else {
+          <div class="grid-display-data" (click)="openDropDownList(row.rowid, column.dataField)">
+            <span
+              [style]="'text-align :' + column.alignment"
+              [matTooltip]="getKBNNmUsingKey(row[column.dataField], column)"
+              actyShowTooltipIfTruncated
+            >
+              {{ (getKBNNmUsingKey(row[column.dataField], column) ?? '') | translate }}
+            </span>
+            @if(isEditableGrid() && column.isEditable && !row?.childOperations?.disabledFields?.includes(column.dataField)){
+              <mat-icon
+                suffix-button
+                class="drop-down-icons-button"
+                variant="text"
+                (click)="openDropDownList(row.rowid, column.dataField)"
+              >
+                arrow_drop_down
+              </mat-icon>
+              }
+          </div>
+          <div class="dropdown-input-hint" [attr.data-col]="column.dataField" [attr.grid-id]="gridId()">
+            @if (getInvalidMessage(row, column.dataField) &&
+            getInvalidMessage(row, column.dataField)?.message) {
+            <div
+              [class]="'cell-show-hint-' + getHintType(row, column.dataField)"
+            >
+              <div class="hint-container">
+                <div>
+                  <mat-icon>{{ getHintIcon(row, column.dataField) }}</mat-icon>
+                </div>
+                <span
+                  [matTooltip]="
+                    getInvalidMessage(row, column.dataField)?.message ?? ''
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  "
+                  [matTooltipClass]="
+                    'acty-tooltip-' + getHintType(row, column.dataField)
+                  "
+                  actyShowTooltipIfTruncated
+                >
+                  {{
+                    getInvalidMessage(row, column.dataField)?.message ?? ""
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  }}
+                </span>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        }
+        @else if (column?.editorType === '5') {
+          <acty-check-box
+            [attr.data-input-for]="column.dataField"
+            [align]="'before'"
+            [showParent]="false"
+            [isDisabled]="
+              !(
+                isEditableCheckboxCell(column, row) &&
+                isPrimaryColumnOfNewRow(column, row)
+              )
+            "
+            [hint]="getInvalidMessage(row, column.dataField)"
+            (hintChange)="onInputInternalHintChange($event, row, column)"
+            [isChecked]="row[column.dataField] === '1' ? true : false"
+            class="grid-edit-data grid-vertical-padding"
+            [class.grid-require-column]="
+              isRequireColumnContainData(column, row)
+            "
+            (change)="
+              onEditChange(row, column.dataField, $event === true ? '1' : '0');
+              onRowDataUpdate(row, column);
+              onInputFinished(row, column);
+            "
+            (click)="
+              selection().isSelected(row.rowid) ? $event.stopPropagation() : ''
+            "
+            #focusableCell
+          >
+          </acty-check-box>
+        }
+        @else {
+          @if (isEditableCell(column,row) &&
+          isPrimaryColumnOfNewRow(column, row)) {
+          <acty-textinput
+            actySelectOnFocus
+            class="grid-edit-data"
+            [attr.data-input-for]="column.dataField"
+            [attr.data-col]="column.dataField"
+            [attr.grid-id]="gridId()"
+            [class.grid-require-column]="
+              isRequireColumnContainData(column, row)
+            "
+            [style.input]="'text-align :' + column.alignment"
+            [hint]="getInvalidMessage(row, column.dataField)"
+            (hintChange)="onInputInternalHintChange($event, row, column)"
+            [(ngModel)]="row[column.dataField]"
+            (ngModelChange)="
+              row[column.dataField] = $event; onRowDataUpdate(row, column)
+            "
+            [maxLength]="getColumnMaxLength(column)"
+            #focusableCell
+            (change)="onInputFinished(row, column)"
+            (valueChanged)="onInputFinished(row, column, true)"
+          >
+          </acty-textinput>
+          } @else {
+          <div class="grid-display-data" [attr.data-col]="column.dataField" [attr.grid-id]="gridId()">
+            <span
+              [style]="'text-align :' + column.alignment"
+              [matTooltip]="row[column.dataField]"
+              actyShowTooltipIfTruncated
+            >
+              {{ row[column.dataField] }}
+            </span>
+          </div>
+          <div class="text-input-hint">
+            @if (getInvalidMessage(row, column.dataField) &&
+            getInvalidMessage(row, column.dataField)?.message) {
+            <div
+              [class]="'cell-show-hint-' + getHintType(row, column.dataField)"
+            >
+              <div class="hint-container">
+                <div>
+                  <mat-icon>{{ getHintIcon(row, column.dataField) }}</mat-icon>
+                </div>
+                <span
+                  [matTooltip]="
+                    getInvalidMessage(row, column.dataField)?.message ?? ''
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  "
+                  [matTooltipClass]="
+                    'acty-tooltip-' + getHintType(row, column.dataField)
+                  "
+                  actyShowTooltipIfTruncated
+                >
+                  {{
+                    getInvalidMessage(row, column.dataField)?.message ?? ""
+                      | translate
+                        : getInvalidMessage(row, column.dataField)?.params
+                  }}
+                </span>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        }
+        </td>
+      </ng-container>
+      <!-- RECURSIVE CHILD COLUMN REGISTRATION -->
+        @for(descendant of getAllDescendants(column); track descendant.dataField){
+          <ng-container
+            [matColumnDef]="descendant.dataField"
+            [sticky]="getColumnisSticky(descendant)"
+          >
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              [attr.colspan]="getColSpan(descendant)"
+              [attr.rowspan]="getRowSpan(descendant, getColumnDepth(descendant))"
+              [class]="
+                'grid-cell grid-header cursor-pointer mat-column-' + descendant.dataField +
+                (isLeafColumn(descendant) ? '' : ' group-header')
+              "
+            >
+              <div class="column-header-container">
+                <span
+                  class="column-header-name"
+                  [matTooltip]="descendant.caption | translate"
+                  actyShowTooltipIfTruncated
+                >
+                  {{ descendant.caption | translate }}
+                </span>
+                @if(showGridOperationBtns && isLeafColumn(descendant)){
+                  <div class="column-header-button-container">
+                    @if(descendant.IsSortable){
+                      <acty-button
+                        type="icon"
+                        [leftIcon]="getSortIcon(descendant.dataField)"
+                        (clicked)="sortData(descendant.dataField)"
+                      />
+                    }
+                    @if(isFilterable(descendant)){
+                      <acty-button
+                        #filterMenuTrigger="matMenuTrigger"
+                        type="icon"
+                        leftIcon="filter_alt"
+                        [matMenuTriggerFor]="childFilterMenu"
+                      />
+                    <mat-menu #childFilterMenu="matMenu" class="grid-filter-menu-panel">
+                      <div
+                        matMenuContent
+                        class="grid-filter-menu-div"
+                        (click)="$event.stopPropagation()"
+                      >
+                        @let filterState = getColumnFilterState(descendant.dataField);
+                        @let columnobj = descendant;
+
+                        @if(columnobj && (columnobj?.editorType === '4' || columnobj?.editorType === '5' || columnobj?.editorType === '6' || columnobj?.editorType === '7')){
+                          <acty-multiselect
+                            [options]="getGridFilterMultiselectoptions(descendant.dataField)"
+                            [maxSelectedLabels]="1"
+                            [(value)]="filterState.rules[0].value"
+                            [styleClass]="'grid-filter-multiselect'"
+                          />
+                        } @else {
+                          <div class="grid-filter-field">
+                            <acty-dropdown
+                              [dataSource]="columnFilterType" [displayExpr]="'displayExpr'"
+                              [valueExpr]="'valueExpr'" [isSearch]="false" [isNullable]="false"
+                              [selectedValue]="filterState.matchMode" (selectionChange)="filterState.matchMode = $event"
+                            >
+                            </acty-dropdown>
+                          </div>
+
+                          <div class="grid-filter-rules-block filter-rules-div">
+                            @for (rule of filterState.rules; let i = $index; track i) {
+                              <div class="filter-state-rule"
+                                [class.border-bottom]="filterState.rules.length > 1 && !$last"
+                              >
+                                <div class="small grid-filter-rule-select">
+                                  <acty-dropdown
+                                    [dataSource]="getColumnFilterRuleOptions(descendant)"
+                                    [displayExpr]="'display'" [valueExpr]="'value'"
+                                    [isSearch]="false" [isNullable]="false"
+                                    [selectedValue]="rule.condition"
+                                    (selectionChange)="rule.condition = $event">
+                                  </acty-dropdown>
+                                </div>
+
+                                @if(columnobj?.editorType === '3'){
+                                  <acty-date-time
+                                    [dateFormat]="descendant.dateFormat"
+                                    type="date"
+                                    [(ngModel)]="rule.value"
+                                  >
+                                  </acty-date-time>
+                                } @else {
+                                  <acty-textinput [(ngModel)]="rule.value" (keyup.enter)="applyFilter()"></acty-textinput>
+                                }
+
+                                @if(filterState.rules.length > 1){
+                                  <acty-button
+                                    type="text"
+                                    severity="danger"
+                                    leftIcon="delete"
+                                    text="CORE.GRID.FilterMatchConditions.RemoveRule"
+                                    btnClass="grid-filter-rule-delete"
+                                    (clicked)="removeRule(descendant.dataField, i)"
+                                  />
+                                }
+                              </div>
+                            }
+                          </div>
+
+                          @if(filterState.rules.length < 2){
+                            <acty-button
+                              type="text"
+                              severity="primary"
+                              leftIcon="add"
+                              [text]="'CORE.GRID.FilterMatchConditions.AddRule' | translate"
+                              btnClass="grid-filter-rule-add"
+                              (clicked)="addRule(descendant)"
+                            />
+                          }
+                        }
+
+                        @if(!descendant.childColumns?.length){
+                          <div class="grid-filter-bottom-btn-container">
+                            <acty-button
+                              [text]="'CORE.GRID.FilterMatchConditions.Clear' | translate"
+                              type="outlined"
+                              severity="primary"
+                              class="grid-filter-rules-clear"
+                              (clicked)="clearFilterAndCloseMenu(descendant, filterMenuTrigger)"
+                            />
+                            <acty-button
+                              [text]="'CORE.GRID.ApplyBtn' | translate"
+                              type="filled"
+                              severity="primary"
+                              class="grid-filter-rules-apply"
+                              (clicked)="applyFilterAndCloseMenu(descendant, filterMenuTrigger)"
+                            />
+                          </div>
+                        }
+                      </div>
+                    </mat-menu>
+                    }
+                  </div>
+                }
+              </div>
+            </th>
+
+            <!-- Last Childs to Render -->
+            @if(isLeafColumn(descendant)){
+              <td
+                mat-cell
+                *matCellDef="let row"
+                [class]="'grid-cell mat-column-' + descendant.dataField"
+              >
+                <div class="grid-display-data">
+                  <span
+                    [style]="'text-align :' + descendant.alignment"
+                    [matTooltip]="row[descendant.dataField]"
+                    actyShowTooltipIfTruncated
+                  >
+                    {{ row[descendant.dataField] }}
+                  </span>
+                </div>
+              </td>
+            }
+          </ng-container>
+        }
+      } }@else {
+      <!-- tabular-grid -->
+      <ng-container matColumnDef="no" sticky>
+        <th mat-header-cell
+            *matHeaderCellDef
+            [attr.rowspan]="getMaxHeaderDepth()"
+            class="indexColumn" sticky>
+          No.
+        </th>
+        <td mat-cell *matCellDef="let row; let i = index" class="indexColumn">
+          @if(row.isTotalRow){
+          {{'CORE.GRID.TotalRow' | translate}}
+          }@else if(isFooterVisible){
+          {{ paginator.pageIndex * paginator.pageSize + i + 1 }}
+          }@else {
+          {{ i + 1 }}
+          }
+        </td>
+      </ng-container>
+
+      @if(selectionMode() === 'multiple'){
+      <ng-container matColumnDef="select" sticky>
+        <th mat-header-cell *matHeaderCellDef class="multiSelectColumn">
+          <acty-check-box
+            [align]="'before'"
+            [showParent]="false"
+            [isChecked]="selection().hasValue() && isAllSelected()"
+            (change)="toggleAllRows($event)"
+            [indeterminate]="selection().hasValue() && !isAllSelected()"
+          >
+          </acty-check-box>
+        </th>
+        <td mat-cell *matCellDef="let row" class="multiSelectColumn">
+          <acty-check-box
+            [align]="'before'"
+            [showParent]="false"
+            [isChecked]="selection().isSelected(row.rowid)"
+            (change)="onCheckboxChangeOfMultiSelection(row.rowid, $event)"
+            (click)="$event.stopPropagation()"
+          >
+          </acty-check-box>
+        </td>
+      </ng-container>
+      }
+      <ng-container [matColumnDef]="'tabularData'">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          class="tabular-grid-cell tabular-grid-header"
+          sticky
+        >
+          <div class="group-container">
+            @for (rowIndex of getAllRows(); track $index) {
+              <div class="group-row">
+                @for (groupNo of getColumnGroups(); track $index) {
+                  <div class="group-section"
+                    [actySyncMinWidth]="'field-value-' + groupNo"
+                    [currLanguage]="currLanguage"
+                    [style.min-width]="'var(--field-value-' + groupNo + '-min-width)'">
+                @for (field of getFieldsForRow(rowIndex, groupNo); track $index;
+                let first = $first) {
+                <div
+                  [class]="
+                    'group-field' +
+                    (first ? ' first-group-field' : ' other-group-field')
+                  "
+                >
+                  <div
+                    class="header-label"
+                    [attr.data-label-for]="field.dataField"
+                    [class.header-field-label]="first"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    <mat-label
+                      [class]="
+                        isRequiredColumn(field) ? ' required-column-header' : ''
+                      "
+                      [matTooltip]="getColumnTooltip(field.dataField)"
+                      matTooltipPosition="above"
+                      matTooltipClass="multiline-tooltip"
+                      >{{ field.caption | translate }}</mat-label
+                    >
+                  </div>
+                </div>
+                }
+              </div>
+              }
+            </div>
+          }
+          </div>
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let row; let i = index"
+          class="tabular-grid-cell tabular-grid-tabColumn"
+        >
+          <div class="group-container">
+            @for (rowIndex of getAllRows(); track $index) {
+            <div class="group-row">
+              @for (groupNo of getColumnGroups(); track $index;) {
+                <div class="group-section"
+                  [actySyncMinWidth]="'field-value-' + groupNo"
+                  [currLanguage]="currLanguage"
+                  [style.min-width]="'var(--field-value-' + groupNo + '-min-width)'">
+              @for (field of getFieldsForRow(rowIndex, groupNo); track $index;
+              let first = $first) {
+              <div
+                [class]="
+                  'group-field' +
+                  (isCellUpdated(field.dataField, row) ? ' updatedField' : '') +
+                  (hasColumnError(field, row) ? ' errorField' : '') +
+                  (first ? ' first-group-field' : ' other-group-field')
+                "
+              >
+                @if(!stickyHeader()){
+                <div
+                  [currLanguage]="currLanguage"
+                  [actySyncMinWidth]="
+                    shouldSyncMinWidth(first, i) ? 'field-label-' + groupNo : ''
+                  "
+                  [style.min-width]="
+                    first ? 'var(--field-label-' + groupNo + '-min-width)' : ''
+                  "
+                  [class]="'field-label'"
+                  [class.first-field-label]="first"
+                  [class.required-field-label]="isRequiredColumn(field)"
+                >
+                  <mat-label
+                    [class]="
+                      isRequiredColumn(field) ? ' required-column-header' : ''
+                    "
+                    [matTooltip]="getColumnTooltip(field.dataField)"
+                    matTooltipPosition="above"
+                    matTooltipClass="multiline-tooltip"
+                    >{{ field.caption | translate }}</mat-label
+                  >
+                  @if(isRequiredColumn(field)){
+                  <span style="color: var(--theme-danger)"></span>
+                  }
+                </div>
+                }
+                <div
+                  [class]="
+                    'field-value' +
+                    ((editableMap[field.dataField] &&
+                    isPrimaryColumnOfNewRow(field, row))
+                      ? ' field-value-editable-container'
+                      : ' field-value-readonly-container')
+                  "
+                >
+                  <!-- Render field types dynamically -->
+                  @switch(field?.editorType) {
+                    @case('1') {
+                  @if(editableMap[field.dataField] &&
+                  selection().isSelected(row.rowid)&&
+                  isPrimaryColumnOfNewRow(field, row)) {
+                  <acty-textinput
+                    class="input-wrapper-tag"
+                    [attr.data-input-for]="field.dataField"
+                    [style.width]="getColumnMaxlengthWidth(field)"
+                    [style.textAlign]="field.alignment"
+                    [class.grid-require-column]="
+                      isRequireColumnContainData(field, row)
+                    "
+                    [attr.data-col]="field.dataField"
+                    [attr.grid-id]="gridId()"
+                    actySelectOnFocus
+                    [hint]="getInvalidMessage(row, field.dataField)"
+                    (hintChange)="onInputInternalHintChange($event, row, field)"
+                    [(ngModel)]="row[field.dataField]"
+                    [maxLength]="getColumnMaxLength(field)"
+                    (ngModelChange)="
+                      row[field.dataField] = $event; onRowDataUpdate(row, field)
+                    "
+                    (change)="onInputFinished(row, field)"
+                    (valueChanged)="onInputFinished(row, field, true)"
+                    tabindex="{{ field.tabIndex }}"
+                    [type]="field.isProtected ? 'password' : 'text'"                    
+                    [hide]="isPasswordHidden(row, row.rowid, field.dataField)"
+                    (hideChange)="setPasswordHidden(row, row.rowid, field.dataField, $event)"
+                    #focusableCell
+                  >
+                    @if(isReferenceScreenAvailable(field) &&
+                    !isAutoGenerateColumn(field) && isEditableGrid()){
+                    <acty-reference-screen-button
+                      suffix-button
+                      [referenceScreenId]="getReferencesTableName(field)"
+                      [rowId]="row.rowid"
+                      class="icons reference-button"
+                      [refForColumn]="field.dataField"
+                      [selectedValue]="row[field.dataField]"
+                      [refRelations]="field.refRelations ?? []"
+                      [formId]="formId()"
+                      [userId]="userId()"
+                      [gridId]="gridId()"
+                      [tabId]="tabId()"
+                      [gridRefData]="refScreenOnRowData()"
+                      (referenceSelected)="onReferenceDataSelected($event, row)"
+                    />
+                    }
+                  </acty-textinput>
+                  } @else {
+                  <div
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                    [class]="
+                      (hasColumnError(field, row) ? ' errorCell' : '') +
+                      (isRequireColumnContainData(field, row)
+                        ? ' grid-require-column'
+                        : '') +
+                      (isCellUpdated(field.dataField, row)
+                        ? ' updatedCell'
+                        : '')
+                    "
+                    class="field-value-readonly white-space-nowrap"
+                    (click)="
+                      onCellClickedFocusInTabularGrid(
+                        $event,
+                        row.rowid,
+                        field.dataField
+                      )
+                    "
+                  >
+                    <div
+                      class="editable-tabulargrid-cells"
+                      [style]="{
+                        'justify-content': field.alignment
+                      }"
+                    >
+                      <span actyShowTooltipIfTruncated [matTooltip]="field.isProtected ? '•••••' : row[field.dataField]">
+                        {{ field.isProtected ? '•••••' : row[field.dataField] }}
+                      </span>
+                    </div>
+                     @if(isReferenceScreenAvailable(field) && field.isEditable &&
+                        !isAutoGenerateColumn(field) && isEditableGrid() && isPrimaryColumnOfNewRow(field, row)){
+                        <acty-reference-screen-button
+                          suffix-button
+                          [referenceScreenId]="getReferencesTableName(field)"
+                          [rowId]="row.rowid"
+                          class="icons reference-button reference-icons-button"
+                          [refForColumn]="field.dataField"
+                          [selectedValue]="row[field.dataField]"
+                          [refRelations]="field.refRelations ?? []"
+                          [formId]="formId()"
+                          [userId]="userId()"
+                          [gridId]="gridId()"
+                          [tabId]="tabId()"
+                          (referenceSelected)="onReferenceDataSelected($event, row)"
+                        />
+                        }
+                      @if(isEditableGrid() && field.isEditable && field.isProtected === true){
+                        <acty-button
+                        suffix-button
+                        class="icons reference-button"
+                        [type]="'icon'"
+                        variant="text"
+                        [leftIcon]="isPasswordHidden(row, row.rowId, field.dataField) ? 'visibility_off' : 'visibility'"
+                        (click)="toggleGridPassword(row, row.rowId, field.dataField, $event)"
+                        class="reference-acty-button"            
+                      />
+                      }
+                  </div>
+                  <div
+                    class="text-input-hint"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    @if (getInvalidMessage(row, field.dataField) &&
+                    getInvalidMessage(row, field.dataField)?.message) {
+                    <div
+                      [class]="
+                        'cell-show-hint-' + getHintType(row, field.dataField)
+                      "
+                    >
+                      <div class="hint-container">
+                        <div class="hint-wrapper">
+                          <div>
+                            <mat-icon>{{
+                              getHintIcon(row, field.dataField)
+                            }}</mat-icon>
+                          </div>
+                          <span
+                            [matTooltip]="
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ''
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            "
+                            [matTooltipClass]="
+                              'acty-tooltip-' +
+                              getHintType(row, field.dataField)
+                            "
+                            appShowTooltipIfTruncated
+                          >
+                            {{
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ""
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  } } @case('2') { @if(editableMap[field.dataField] &&
+                  selection().isSelected(row.rowid)&&
+                  isPrimaryColumnOfNewRow(field, row)) {
+                  <acty-numberinput
+                    actySelectOnFocus
+                    [attr.data-input-for]="field.dataField"
+                    [hint]="getInvalidMessage(row, field.dataField)"
+                    (hintChange)="onInputInternalHintChange($event, row, field)"
+                    [showButtons] = "field.isSpinButton ? field.isSpinButton : false"
+                    [maxValue]="field.maxValue"
+                    [minValue]="field.minValue"
+                    [attr.data-col]="field.dataField"
+                    [attr.grid-id]="gridId()"
+                    [dataPrecision]="field.dataPrecision"
+                    [dataScale]="field.dataScale  ?? 3"
+                    [style.width]="getColumnMaxlengthWidth(field)"
+                    [style.textAlign]="field.alignment"
+                    class="input-wrapper-tag"
+                    [class.grid-require-column]="
+                      isRequireColumnContainData(field, row)
+                    "
+                    [(ngModel)]="row[field.dataField]"
+                    (ngModelChange)="
+                      row[field.dataField] = $event; onRowDataUpdate(row, field)
+                    "
+                    (change)="onInputFinished(row, field)"
+                    (valueChanged)="onInputFinished(row, field)"
+                    tabindex="{{ field.tabIndex }}"
+                    #focusableCell
+                  >
+                   @if(isReferenceScreenAvailable(field) &&
+                    !isAutoGenerateColumn(field) && isEditableGrid()){                      
+                    <acty-reference-screen-button
+                      suffix-button
+                      [referenceScreenId]="getReferencesTableName(field)"
+                      [rowId]="row.rowid"
+                      class="icons reference-button"
+                      [refForColumn]="field.dataField"
+                      [selectedValue]="row[field.dataField]"
+                      [refRelations]="field.refRelations ?? []"
+                      [formId]="formId()"
+                      [userId]="userId()"
+                      [gridId]="gridId()"
+                      [tabId]="tabId()"
+                      [gridRefData]="refScreenOnRowData()"
+                      (referenceSelected)="onReferenceDataSelected($event, row)"
+                    />
+                    }
+                  </acty-numberinput>
+                  } @else {
+                  <div
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                    [class]="
+                      (hasColumnError(field, row) ? ' errorCell' : '') +
+                      (isRequireColumnContainData(field, row)
+                        ? ' grid-require-column'
+                        : '') +
+                      (isCellUpdated(field.dataField, row)
+                        ? ' updatedCell'
+                        : '')
+                    "
+                    class="field-value-readonly white-space-nowrap"
+                    (click)="
+                      onCellClickedFocusInTabularGrid(
+                        $event,
+                        row.rowid,
+                        field.dataField
+                      )
+                    "
+                  >
+                    <div
+                      class="editable-tabulargrid-cells"
+                      [style]="{
+                        'justify-content': field.alignment
+                      }"
+                    >
+                      <span actyShowTooltipIfTruncated [matTooltip]="row[field.dataField]">
+                        {{ row[field.dataField] | actyNumber:translate.currentLang}}
+                      </span>
+                    </div>
+                     @if(isReferenceScreenAvailable(field) && field.isEditable &&
+                        !isAutoGenerateColumn(field) && isEditableGrid() && isPrimaryColumnOfNewRow(field, row)){
+                        <acty-reference-screen-button
+                          suffix-button
+                          [referenceScreenId]="getReferencesTableName(field)"
+                          [rowId]="row.rowid"
+                          class="icons reference-button reference-icons-button"
+                          [refForColumn]="field.dataField"
+                          [selectedValue]="row[field.dataField]"
+                          [refRelations]="field.refRelations ?? []"
+                          [formId]="formId()"
+                          [userId]="userId()"
+                          [gridId]="gridId()"
+                          [tabId]="tabId()"
+                          (referenceSelected)="onReferenceDataSelected($event, row)"
+                        />
+                        }
+                  </div>
+                  <div
+                    class="number-input-hint"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    @if (getInvalidMessage(row, field.dataField) &&
+                    getInvalidMessage(row, field.dataField)?.message) {
+                    <div
+                      [class]="
+                        'cell-show-hint-' + getHintType(row, field.dataField)
+                      "
+                    >
+                      <div class="hint-container">
+                        <div class="hint-wrapper">
+                          <div>
+                            <mat-icon>{{
+                              getHintIcon(row, field.dataField)
+                            }}</mat-icon>
+                          </div>
+                          <span
+                            [matTooltip]="
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ''
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            "
+                            [matTooltipClass]="
+                              'acty-tooltip-' +
+                              getHintType(row, field.dataField)
+                            "
+                            appShowTooltipIfTruncated
+                          >
+                            {{
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ""
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  } } @case('3') { @if(editableMap[field.dataField] &&
+                  selection().isSelected(row.rowid)&&
+                  isPrimaryColumnOfNewRow(field, row)) {
+                  <acty-date-time
+                    #dateTime
+                    type="date"
+                    [attr.data-input-for]="field.dataField"
+                    [attr.data-col]="field.dataField"
+                    [attr.grid-id]="gridId()"
+                    [dateFormat]="field?.dateFormat"
+                    [hint]="getInvalidMessage(row, field.dataField)"
+                    (hintChange)="onInputInternalHintChange($event, row, field)"
+                    [(ngModel)]="row[field.dataField]"
+                    (ngModelChange)="
+                      onEditChange(row, field.dataField, $event);
+                      onRowDataUpdate(row, field)
+                    "
+                    (change)="onInputFinished(row, field)"
+                    (valueChanged)="onInputFinished(row, field)"
+                    class="input-wrapper-tag"
+                    [style.width]="getColumnMaxlengthWidth(field)"
+                    [class.grid-require-column]="
+                      isRequireColumnContainData(field, row)
+                    "
+                    [class]="
+                      'acty-date-column-' +
+                      field.dataField +
+                      '-rowid-' +
+                      row.rowid
+                    "
+                    actySelectOnFocus
+                    tabindex="{{ field.tabIndex }}"
+                    #focusableCell
+                  ></acty-date-time>
+                  } @else {
+                  <div
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                    [class]="
+                      (hasColumnError(field, row) ? ' errorCell' : '') +
+                      (isRequireColumnContainData(field, row)
+                        ? ' grid-require-column'
+                        : '') +
+                      (isCellUpdated(field.dataField, row)
+                        ? ' updatedCell'
+                        : '')
+                    "
+                    class="field-value-readonly"
+                    (click)="
+                      onCellClickedFocusInTabularGrid(
+                        $event,
+                        row.rowid,
+                        field.dataField
+                      )
+                    "
+                  >
+                    <div
+                      class="editable-tabulargrid-cells"
+                      [style]="{
+                        'justify-content': field.alignment
+                      }"
+                    >
+                      <span actyShowTooltipIfTruncated [matTooltip]="
+                      row[field.dataField] | actyDate : translate.currentLang :field.dateFormat
+                    ">
+                        {{
+                          row[field.dataField] | actyDate : translate.currentLang :field.dateFormat
+                        }}
+                      </span>
+                    </div>
+                    @if(isEditableGrid() && field.isEditable){
+                    <acty-button
+                      suffix-button
+                      class="calendar-icons-button"
+                      [type]="'icon'"
+                      variant="text"
+                      [leftIcon]="'calendar_today'"
+                      (clicked)="openCalendarPopup(row.rowid, field.dataField)"
+                    />
+                    }
+                  </div>
+                  <div
+                    class="date-input-hint"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    @if (getInvalidMessage(row, field.dataField) &&
+                    getInvalidMessage(row, field.dataField)?.message) {
+                    <div
+                      [class]="
+                        'cell-show-hint-' + getHintType(row, field.dataField)
+                      "
+                    >
+                      <div class="hint-container">
+                        <div class="hint-wrapper">
+                          <div>
+                            <mat-icon>{{
+                              getHintIcon(row, field.dataField)
+                            }}</mat-icon>
+                          </div>
+                          <span
+                            [matTooltip]="
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ''
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            "
+                            [matTooltipClass]="
+                              'acty-tooltip-' +
+                              getHintType(row, field.dataField)
+                            "
+                            appShowTooltipIfTruncated
+                          >
+                            {{
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ""
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  } } @case('4') { @if(editableMap[field.dataField] &&
+                  selection().isSelected(row.rowid)&&
+                  isPrimaryColumnOfNewRow(field, row)) {
+                  <acty-dropdown
+                    #dropDown
+                    [attr.data-input-for]="field.dataField"
+                    class="input-wrapper-tag"
+                    [attr.data-col]="field.dataField"
+                    [attr.grid-id]="gridId()"
+                    [style.width]="getColumnMaxlengthWidth(field)"
+                    [dataSource]="field?.memberList || []"
+                    [class.grid-require-column]="
+                      isRequireColumnContainData(field, row)
+                    "
+                    actySelectOnFocus
+                    [hint]="getInvalidMessage(row, field.dataField)"
+                    (hintChange)="onInputInternalHintChange($event, row, field)"
+                    [displayExpr]="'caption'"
+                    [valueExpr]="'code'"
+                    [isNullable]="false"
+                    [isSearch]="false"
+                    [required]="false"
+                    [isDisabled]="false"
+                    [selectedValue]="row[field.dataField]"
+                    (selectionChange)="
+                      onEditChange(row, field.dataField, $event);
+                      onRowDataUpdate(row, field);
+                      onInputFinished(row, field);
+                    "
+                    [class]="
+                      'acty-date-column-' +
+                      field.dataField +
+                      '-rowid-' +
+                      row.rowid
+                    "
+                    tabindex="{{ field.tabIndex }}"
+                    #focusableCell
+                  >
+                  </acty-dropdown>
+                  } @else {
+                  <div
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                    [class]="
+                      (hasColumnError(field, row) ? ' errorCell' : '') +
+                      (isRequireColumnContainData(field, row)
+                        ? ' grid-require-column'
+                        : '') +
+                      (isCellUpdated(field.dataField, row)
+                        ? ' updatedCell'
+                        : '')
+                    "
+                    class="field-value-readonly cursor-pointer"
+                    (click)="openDropDownList(row.rowid, field.dataField)"
+                  >
+                    <div
+                      class="editable-tabulargrid-cells"
+                      [style]="{
+                        'justify-content': field.alignment
+                      }"
+                    >
+                      <span [matTooltip]="getKBNNmUsingKey(row[field.dataField], field)" actyShowTooltipIfTruncated>
+                        {{ (getKBNNmUsingKey(row[field.dataField], field) ?? '') | translate}}
+                      </span>
+                    </div>
+                    @if(isEditableGrid() && field.isEditable){
+                    <!--<acty-button
+                        suffix-button
+                        class="drop-down-icons-button"
+                        [type]="'icon'"
+                        variant="text"
+                        [leftIcon]="'arrow_drop_down'"
+                        [avoidTabFocus]="true"
+                        (clicked)="openDropDownList(row.rowid, field.dataField)"
+                      />-->
+                    <mat-icon
+                      suffix-button
+                      class="drop-down-icons-button"
+                      variant="text"
+                      (click)="openDropDownList(row.rowid, field.dataField)"
+                    >
+                      arrow_drop_down
+                    </mat-icon>
+                    }
+                  </div>
+                  <div
+                    class="dropdown-input-hint"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    @if (getInvalidMessage(row, field.dataField) &&
+                    getInvalidMessage(row, field.dataField)?.message) {
+                    <div
+                      [class]="
+                        'cell-show-hint-' + getHintType(row, field.dataField)
+                      "
+                    >
+                      <div class="hint-container">
+                        <div class="hint-wrapper">
+                          <div>
+                            <mat-icon>{{
+                              getHintIcon(row, field.dataField)
+                            }}</mat-icon>
+                          </div>
+                          <span
+                            [matTooltip]="
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ''
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            "
+                            [matTooltipClass]="
+                              'acty-tooltip-' +
+                              getHintType(row, field.dataField)
+                            "
+                            appShowTooltipIfTruncated
+                          >
+                            {{
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ""
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  } } @case ('5') {
+                  <acty-check-box
+                    class="input-wrapper-tag"
+                    [attr.data-input-for]="field.dataField"
+                    [align]="'before'"
+                    [showParent]="false"
+                    [isDisabled]="
+                      !(
+                        isEditableCheckboxCell(field, row) &&
+                        isPrimaryColumnOfNewRow(field, row)
+                      )
+                    "
+                    [attr.data-col]="field.dataField"
+                    [attr.grid-id]="gridId()"
+                    [isChecked]="row[field.dataField] === '1' ? true : false"
+                    [hint]="getInvalidMessage(row, field.dataField)"
+                    (hintChange)="onInputInternalHintChange($event, row, field)"
+                    (change)="
+                      onEditChange(
+                        row,
+                        field.dataField,
+                        $event === true ? '1' : '0'
+                      );
+                      onRowDataUpdate(row, field);
+                      onInputFinished(row, field);
+                    "
+                    [class]="
+                      (hasColumnError(field, row) ? ' errorCell' : '') +
+                      (isRequireColumnContainData(field, row)
+                        ? ' grid-require-column'
+                        : '') +
+                      (isCellUpdated(field.dataField, row)
+                        ? ' updatedCell'
+                        : '')
+                    "
+                    tabindex="{{ field.tabIndex }}"
+                    #focusableCell
+                  >
+                  </acty-check-box>
+                  <div
+                    class="checkbox-input-hint"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    @if (getInvalidMessage(row, field.dataField) &&
+                    getInvalidMessage(row, field.dataField)?.message) {
+                    <div
+                      [class]="
+                        'cell-show-hint-' + getHintType(row, field.dataField)
+                      "
+                    >
+                      <div class="hint-container">
+                        <div class="hint-wrapper">
+                          <div>
+                            <mat-icon>{{
+                              getHintIcon(row, field.dataField)
+                            }}</mat-icon>
+                          </div>
+                          <span
+                            [matTooltip]="
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ''
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            "
+                            [matTooltipClass]="
+                              'acty-tooltip-' +
+                              getHintType(row, field.dataField)
+                            "
+                            appShowTooltipIfTruncated
+                          >
+                            {{
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ""
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  } @default { @if(editableMap[field.dataField] &&
+                  selection().isSelected(row.rowid)&&
+                  isPrimaryColumnOfNewRow(field, row)) {
+                  <acty-textinput
+                    [attr.data-input-for]="field.dataField"
+                    class="input-wrapper-tag"
+                    [(ngModel)]="row[field.dataField]"
+                    [style.width]="getColumnMaxlengthWidth(field)"
+                    [style.textAlign]="field.alignment"
+                    [class.grid-require-column]="
+                      isRequireColumnContainData(field, row)
+                    "
+                    [attr.data-col]="field.dataField"
+                    [attr.grid-id]="gridId()"
+                    actySelectOnFocus
+                    [hint]="getInvalidMessage(row, field.dataField)"
+                    (hintChange)="onInputInternalHintChange($event, row, field)"
+                    [maxLength]="getColumnMaxLength(field)"
+                    (ngModelChange)="
+                      row[field.dataField] = $event; onRowDataUpdate(row, field)
+                    "
+                    (change)="onInputFinished(row, field)"
+                    (valueChanged)="onInputFinished(row, field, true)"
+                    tabindex="{{ field.tabIndex }}"
+                    #focusableCell
+                  ></acty-textinput>
+                  } @else {
+                  <div
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                    [class]="
+                      (hasColumnError(field, row) ? ' errorCell' : '') +
+                      (isRequireColumnContainData(field, row)
+                        ? ' grid-require-column'
+                        : '') +
+                      (isCellUpdated(field.dataField, row)
+                        ? ' updatedCell'
+                        : '')
+                    "
+                    class="field-value-readonly"
+                    (click)="
+                      onCellClickedFocusInTabularGrid(
+                        $event,
+                        row.rowid,
+                        field.dataField
+                      )
+                    "
+                  >
+                    <div
+                      class="editable-tabulargrid-cells"
+                      [style]="{
+                        'justify-content': field.alignment
+                      }"
+                    >
+                      <span [matTooltip]="row[field.dataField]" actyShowTooltipIfTruncated>
+                        {{ row[field.dataField] }}
+                      </span>
+                    </div>
+                    @if(isReferenceScreenAvailable(field) &&
+                    !isAutoGenerateColumn(field) && isEditableGrid()){
+                    <acty-reference-screen-button
+                      suffix-button
+                      [referenceScreenId]="getReferencesTableName(field)"
+                      [rowId]="row.rowid"
+                      class="icons reference-button"
+                      [refForColumn]="field.dataField"
+                      [selectedValue]="row[field.dataField]"
+                      [refRelations]="field.refRelations ?? []"
+                      [formId]="formId()"
+                      [userId]="userId()"
+                      [gridId]="gridId()"
+                      [tabId]="tabId()"
+                      [gridRefData]="refScreenOnRowData()"
+                      (referenceSelected)="onReferenceDataSelected($event, row)"
+                    />
+                    }
+                  </div>
+                  <div
+                    class="text-input-hint"
+                    [style]="'width : ' + getColumnMaxlengthWidth(field)"
+                  >
+                    @if (getInvalidMessage(row, field.dataField) &&
+                    getInvalidMessage(row, field.dataField)?.message) {
+                    <div
+                      [class]="
+                        'cell-show-hint-' + getHintType(row, field.dataField)
+                      "
+                    >
+                      <div class="hint-container">
+                        <div class="hint-wrapper">
+                          <div>
+                            <mat-icon>{{
+                              getHintIcon(row, field.dataField)
+                            }}</mat-icon>
+                          </div>
+                          <span
+                            [matTooltip]="
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ''
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            "
+                            [matTooltipClass]="
+                              'acty-tooltip-' +
+                              getHintType(row, field.dataField)
+                            "
+                            appShowTooltipIfTruncated
+                          >
+                            {{
+                              getInvalidMessage(row, field.dataField)
+                                ?.message ?? ""
+                                | translate
+                                  : getInvalidMessage(row, field.dataField)
+                                      ?.params
+                            }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  } } }
+                </div>
+              </div>
+              }
+              </div>
+            }
+          </div>
+          }
+          </div>
+        </td>
+      </ng-container>
+      }
+      <!-- [style.display]="gridFormat() === 'tabular' && !stickyHeader() ? 'none' : ''" -->
+      <!-- Dynamic header rows -->
+      @for(headerRow of getHeaderRows(); track $index){
+        <tr mat-header-row
+          *matHeaderRowDef="(gridFormat() === 'normal' ? headerRow : renderedColumns); sticky: true"
+          [class.tabular-grid-headerRow]="$index === 0 && gridFormat() === 'tabular'"
+          [class.hide-headers]="!stickyHeader()"
+        >
+        </tr>
+      }
+
+      <tr
+        mat-row
+        *matRowDef="let row; columns: renderedColumns"
+        [attr.data-row-id]="row.rowid"
+        [class.grid-dataRow]="gridFormat() === 'normal'"
+        [class.tabular-grid-dataRow]="gridFormat() === 'tabular'"
+        [class.selected-row]="selection().isSelected(row.rowid)"
+        (click)="blockRowSelectionChange() ? '' : handleRowClick($event, row)"
+        (dblclick)="onRowDoubleClick(row)">
+      </tr>
+    </table>
+  </div>
+  <!-- DetailView  -->
+  <div
+    #detailViewContainer
+    class="detailViewTabContainer"
+    style="border: 1px solid var(--theme-surface)"
+  >
+    @if(selectedRows.length !== 0 && showDetailView){
+    <acty-tab-control
+      [tabsItem]="DetailViewTabList"
+      (tabChange)="onDetailViewTabChange($event)"
+    >
+      @for(tabs of detailViewTab(); track tabs){
+      <div #tab class="acty-tab">
+        <div
+          class="detailview-custom-grid"
+          [style.gridTemplateColumns]="'repeat(' + tabs.tabColumns + ', 1fr)'"
+        >
+          @for (column of displayedColumns; track column;) {
+          @if(isColumnInDetailViewTab(column,tabs.tabCaption)){
+          <div
+            class="detailview-column-span"
+            [style.gridColumn]="
+              'span ' +
+              getSizeofSpan(column) +
+              ' / span ' +
+              getSizeofSpan(column)
+            "
+          >
+            <div class="detailview-container">
+              <span class="detailview-label">{{
+                getColumnDisplayName(column) | translate
+              }}</span>
+              @switch (getColumnConfig(column)?.editorType) {
+
+              @case ('1') {
+              <acty-textinput
+                type="string"
+                [required]="false"
+                [isVisible]="true"
+                [isNullable]="false"
+                [isDisabled]="isDetailViewDisable()"
+                [(ngModel)]="selectedRows[0][column]"
+              >
+              </acty-textinput>
+              }
+              @case ('2') {
+              <acty-numberinput
+                [required]="false"
+                [minValue]="0"
+                [isDisabled]="isDetailViewDisable()"
+                [(ngModel)]="selectedRows[0][column]"
+              >
+              </acty-numberinput>
+              }
+              @case ('3') {
+              <acty-date-time
+                [(ngModel)]="selectedRows[0][column]"
+                [isDisabled]="isDetailViewDisable()"
+                displayFormat="yyyy/MM/dd"
+              >
+              </acty-date-time>
+              }
+              @case ('4'){
+              <mat-form-field
+                class="grid-field small"
+                (click)="$event.stopPropagation()"
+              >
+                <mat-select
+                  [disabled]="isDetailViewDisable()"
+                  [(ngModel)]="selectedRows[0][column]"
+                  (selectionChange)="
+                    onEditChange(selectedRows[0], column, $event.value)
+                  "
+                >
+                  @for (opt of getColumnConfig(column)?.memberList || []; track
+                  opt.code) {
+                  <mat-option [value]="opt.code">{{ opt.caption }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              }
+              @case('5'){
+              <acty-check-box
+                [isDisabled]="isDetailViewDisable()"
+                [isChecked]="selectedRows[0][column] == true ? true : false"
+                (change)="selectedRows[0][column] = ($event == true ? true : false)"
+              >
+              </acty-check-box>
+              } @default {
+              <acty-textinput
+                type="string"
+                [required]="false"
+                [isVisible]="true"
+                [isNullable]="false"
+                [isDisabled]="isDetailViewDisable()"
+                [(ngModel)]="selectedRows[0][column]"
+              >
+              </acty-textinput>
+              } }
+            </div>
+          </div>
+          } }
+        </div>
+      </div>
+      }
+    </acty-tab-control>
+    }
+  </div>
+  @if(showGridButtonContainer() || showPaginator()){
+  <div
+    #paginatorContainer
+    class="grid-paginator-wrapper acty-grid-paginator-wrapper relative"
+    [ngStyle]="{
+      display: GridMenuBtns() && GridMenuBtns().length! > 0 ? 'flex' : ''
+    }"
+  >
+    @if (showGridButtonContainer()) {
+    @if(GridMenuBtns() && GridMenuBtns().length! > 0){
+    <div
+      [ngClass]="
+        GridMenuBtns().length ? 'wrapper-visible' : 'wrapper-not-visible'
+      "
+    >
+      <acty-button-wrapper
+        #buttonWrapper
+        [buttons]="buttons()"
+        [formId]="formId()"
+        [childFormId]="gridId()"
+        [isButtonDisabledFn]="isButtonDisabledFn"
+        [defaultVisibleCount]="GridMenuBtns().length"
+        [buttonOrder]="buttonOrder()"
+        [buttonSettingVisible]="buttonSettingVisible()"
+        [selectedValues]="selectedCellSummary()"
+        [ignoreButtonSetting]="ignoreButtonSetting()"
+        (summaryChanged)="onSummaryChanged($event)"
+        (buttonClicked)="buttonClicked($event)"
+        (toggleClicked)="onClickToggleBtn($event.state, $event.btnId)"
+        (extraButtonClicked)="
+          extraButtonClicked($event.btnId, $event.subAction)
+        "
+        (visibleButtonChanged)="updateScrollHeight()"
+        (click)="this.letParentMaintainCellChanges() !== false ? $event.stopPropagation() : ''"
+      >
+      </acty-button-wrapper>
+    </div>
+    }
+    }
+
+    @if(showPaginator()){
+    <mat-paginator
+      #paginator
+      class="grid-paginator"
+      [length]="paginatorValues()?.TotalData"
+      [pageSize]="currentPageSize()"
+      [pageSizeOptions]="pageSizes()"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      [ngClass]="
+        GridMenuBtns().length ? 'paginator-has-wrapper' : 'paginator-no-wrapper'
+      "
+    >
+    </mat-paginator>
+    } @if(isBackgroundLoadingOn()){
+    <div class="background-loader">
+      <mat-progress-spinner
+        strokeWidth="4"
+        [diameter]="25"
+        mode="indeterminate"
+      />
+      <div class="background-loader-text">
+        {{ "CORE.GRID.BackgroundLoading" | translate }}
+      </div>
+    </div>
+    }
+  </div>
+  } @if(showColumnSwapdialog){
+  <acty-swap-column
+    [userId]="userId()"
+    [formId]="formId()"
+    [childId]="gridId()"
+    [displayInp]="showColumnSwapdialog"
+    [gridColumnList]="gridColumnNameAndDisplayNameListAll()"
+    [formLoaderKey]="formLoaderKey()"
+    (closeTriggered)="closeSwapColumn()"
+    (swapDataUpdated)="onSwapDataUpdate($event)"
+  ></acty-swap-column>
+  } @if(showSortDatadialog){
+  <acty-sort-data
+    [displayDialogInp]="showSortDatadialog"
+    [sortOptionsInp]="gridColumnNameAndDisplayNameList()"
+    [formId]="formId()"
+    [userId]="userId()"
+    [childId]="gridId()"
+    [formLoaderKey]="formLoaderKey()"
+    (sortDataChanged)="onSortDataChange()"
+    (closeSortDataTrigger)="closeSortData()"
+  />
+  } @if(showExportDatadialog){
+  <acty-export
+    [displayInp]="showExportDatadialog"
+    [exportData]="searchList()"
+    [gridColumnList]="gridColumnNameAndDisplayNameList()"
+    [formLoaderKey]="formLoaderKey()"
+    (closeTriggered)="closeExportData()"
+    [additionalSearchData]="additionalSearchData()"
+    [apiObjectName]="apiObjectName()"
+    [screenName]="screenName()"
+    [getDataMethod]="getDataMethod()"
+    [relationList]="relationList()"
+    [currPkData]="currPkData()"
+  >
+  </acty-export>
+  }
+</div>
+<acty-cell-summary [setCellSummaryPosition]="setCellSummaryPosition()" [selectedCategories]="selectedCellSummary()" (summaryChanged)="onSummaryChanged($event)"
+  [selectedValues]="selectedValues()" class="cell-summary"
+></acty-cell-summary>

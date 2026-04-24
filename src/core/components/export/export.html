@@ -1,0 +1,52 @@
+<acty-dialog-box
+  #dialog
+  [title]="CaptionName"
+  [showTitle]="true"
+  [showFooterButton]="true"
+  [buttons]="buttons"
+  (dialogResult)="handleDialogResult($event)"
+  [showClose]="true"
+  [showIcon]="false"
+  [buttonPosition]="'right'"
+  [isDraggable]="true"
+  [width]="'auto'"
+  [height]="'auto'"
+  (dialogClosed)="onCloseDialog($event)"
+>
+  <div class="exportlayout-container">
+    <label>
+      {{ "CORE.EXPORT.Label" | translate
+      }}<span class="field-required-indicator">*</span>:
+    </label>
+    <div class="fileNameInputContainer">
+      <acty-textinput
+        placeholder="File Name"
+        type="text"
+        [required]="false"
+        [isVisible]="true"
+        [isNullable]="false"
+        [isEditable]="true"
+        appearance="outline"
+        floatLabel="always"
+        [(ngModel)]="fileName"
+      >
+      </acty-textinput>
+    </div>
+    <div class="fileTypedropdownContainer">
+      <acty-dropdown
+        [dataSource]="FiletypeforDropDown"
+        [displayExpr]="'name'"
+        [placeholder]="'CORE.SORTDATA.NoneSelectedOption'"
+        [isVisible]="true"
+        [isMultiple]="false"
+        [isSearch]="false"
+        [selectedValue]="FiletypeforDropDown[0]"
+        [valueExpr]="'id'"
+        [isNullable]="false"
+        [required]="false"
+        (selectionChange)="onSelectionChanged($event)"
+      >
+      </acty-dropdown>
+    </div>
+  </div>
+</acty-dialog-box>

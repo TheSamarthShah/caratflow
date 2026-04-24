@@ -1,0 +1,164 @@
+<div #buttonWrapper class="button-wrapper">
+  <div class="visible-buttons" #visiblebuttonContainer>
+
+
+     @for (item of items(); track $index; let i = $index) {
+    @if (item.visible) {
+    <div class="button-item" #buttonItem [class.hidden]="!item.visible">
+      @let btn = item.button;
+      <!-- Render the buttons inline for visible buttons -->
+      @if(btn.type == 'split-outlined' || btn.type == 'split-filled') {
+      <acty-splitbutton [type]="btn.type === 'split-outlined' ? 'outlined' : 'filled'" [text]="btn.caption | translate"
+        [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false" [leftIcon]="btn.leftIcon"
+        [menuItems]="btn.menuModel ?? []" [severity]="btn.severity ?? 'primary'" (clicked)="handleExtraClick(btn.btnId)"
+        (menuClicked)="handleExtraClick(btn.btnId, $event)">
+      </acty-splitbutton>
+      }
+      @else if(btn.type == 'menu-outlined' || btn.type == 'menu-filled') {
+      <acty-menubutton [type]="btn.type === 'menu-outlined' ? 'outlined' : 'filled'" [text]="btn.caption | translate"
+        [leftIcon]="btn.leftIcon" [rightIcon]="btn.rightIcon"
+        [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false" [menuItems]="btn.menuModel ?? []"
+        [severity]="btn.severity" (menuClicked)="handleExtraClick(btn.btnId, $event)">
+      </acty-menubutton>
+      }
+      @else if(btn.type == 'multiselect-outlined' || btn.type == 'multiselect-filled') {
+        <acty-multiselect [options]="getMultiSelectData(btn)" [maxSelectedLabels]="btn.maxSelectedLabels" [fixedPlaceholder]="btn.caption | translate"
+          [filter]="false" [leftIcon]="btn.leftIcon" [showToggleAll]="false" [value]="selectedValues()" [severity]="'primary'"
+          (valueChange)="handleExtraClick(btn.btnId, $event)">">
+        </acty-multiselect>
+      }
+      @else if(btn.type == 'toggle') {
+      <acty-toggle-button #toggelButton [inactiveText]="btn?.inactiveText ?? ''" [state]="btn?.state ?? 'inactive'"
+        [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false"
+        [inactiveLeftIcon]="btn.inactiveLeftIcon" [activeLeftIcon]="btn.activeLeftIcon"
+        [inactiveRightIcon]="btn.inactiveRightIcon" [activeRightIcon]="btn.activeRightIcon"
+        (onBtnClick)="handleToggle($event, btn.btnId ?? '')" [severity]="btn.severity">
+      </acty-toggle-button>
+      }
+      @else {
+      <acty-button [type]="btn.type" [text]="btn.caption | translate" 
+        [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false"
+        [leftIcon]="btn.leftIcon" [rightIcon]="btn.rightIcon"
+        [btnClass]="btn.btnClass" [severity]="btn.severity" (clicked)="handleClick(btn.btnId)">
+      </acty-button>
+      }
+    </div>
+        @if (shouldShowSeparator(i)) {
+          <div class="separator"></div>
+        }
+  } }
+    
+    
+     
+  </div>
+  @if (isOverflow()) {
+  <div class="menu-button-wrapper" #menuWrapper>
+    <acty-button #drawerButton class="menu-button" [btnClass]="'menu-button'" [text]="'MENU.More' | translate" [type]="'outlined'" severity="primary"
+      [leftIcon]="'more_vert'" #drawerTrigger="matMenuTrigger" [matMenuTriggerFor]="drawerMenu"
+      (mouseenter)="drawerTrigger.openMenu()" (click)="onPinMenu($event)"
+      (menuClosed)="onDrawerMenuClosed(menuWrapper)"
+       />
+  </div>
+  }
+</div>
+
+<mat-menu #drawerMenu="matMenu" [hasBackdrop]="false" [overlapTrigger]="false" class="buttonwrapper-menu">
+  @for (item of hiddenItems; track $index; let i = $index) {
+  @let btn = getButtonById(item.btnId);
+
+  <div class="menu-item-row" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+    <!-- <acty-check-box [isChecked]="item.visible" (change)="toggleVisibilityById(item.id)" (click)="$event.stopPropagation()"></acty-check-box> -->
+
+    <!-- menu button -->
+    @if (['menu-outlined','menu-filled'].includes(btn?.type ?? '')) {
+    <!-- submenu initialization -->
+    <mat-menu #subMenu="matMenu" class="buttonwrapper-menu">
+      @for (mi of btn?.menuModel; track $index) {
+      <div mat-menu-item (click)="onMenuModelClick(btn, mi, $event)" (keydown.enter)="onMenuModelClick(btn, mi, $event)">
+        @if (mi?.icon) {
+          <mat-icon>{{ mi.icon }}</mat-icon>
+        }
+        {{ mi.label | translate }}
+      </div>
+      }
+    </mat-menu>
+    <!-- parent menu item -->
+    <div mat-menu-item [matMenuTriggerFor]="subMenu" [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+      <span class="drawer-menu-item">
+        @if (btn?.leftIcon) {
+        <mat-icon>{{ btn?.leftIcon }}</mat-icon>
+        }
+        {{ btn?.caption ?? '' | translate }}
+      </span>
+    </div>
+    }
+    <!-- split button -->
+    @else if (['split-outlined','split-filled'].includes(btn?.type ?? '')) {
+    <!-- submenu initialization -->
+    <mat-menu #subMenu="matMenu" class="buttonwrapper-menu">
+      @for (mi of getSplitData(btn); track $index) {
+      <div mat-menu-item (click)="onMenuModelClick(btn, mi, $event)" (keydown.enter)="onMenuModelClick(btn, mi, $event)">
+        @if (mi?.icon) {
+        <mat-icon>{{ mi.icon }}</mat-icon>
+        }
+        {{ mi.label | translate }}
+      </div>
+      }
+    </mat-menu>
+    <!-- parent menu item -->
+    <div mat-menu-item [matMenuTriggerFor]="subMenu"
+      [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+      <span class="drawer-menu-item">
+        @if (btn?.leftIcon) {
+        <mat-icon>{{ btn?.leftIcon }}</mat-icon>
+        }
+        {{ btn?.caption ?? '' | translate }}
+      </span>
+    </div>
+    }
+    <!-- multiSelect button -->
+    @else if (['multiselect-outlined','multiselect-filled'].includes(btn?.type ?? '')) {
+    <!-- submenu initialization -->
+    <mat-menu #subMenu="matMenu" class="buttonwrapper-menu">
+      @for (mi of btn?.menuModel; track $index) {
+      <div mat-menu-item (click)="onMenuModelClick(btn, mi, $event)" (keydown.enter)="onMenuModelClick(btn, mi, $event)">
+        <span style="display: inline-flex; align-items: center;">
+          <acty-check-box [isChecked]="selectedValues().split(',').includes(mi.menuId)"
+            (change)="optionsChanged(btn?.btnId, mi.menuId, $event)" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()"
+          ></acty-check-box> {{ mi.label | translate }}
+        </span>
+      </div>
+      }
+    </mat-menu>
+    <!-- parent menu item -->
+    <div mat-menu-item [matMenuTriggerFor]="subMenu" [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false"
+      (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+      <span class="drawer-menu-item">
+        @if (btn?.leftIcon) {
+        <mat-icon>{{ btn?.leftIcon }}</mat-icon>
+        }
+        {{ btn?.caption ?? '' | translate }}
+      </span>
+    </div>
+    }
+    <!-- Toggle button -->
+    @else if(btn?.type == 'toggle') {
+    <div mat-menu-item [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false" (click)="drawerToggleClk(btn)" (keydown.enter)="drawerToggleClk(btn)">
+      @if (btn?.inactiveLeftIcon) {
+      <mat-icon>{{ getToggleIcon(btn) }}</mat-icon>
+      }
+      <span>{{ btn?.inactiveText ?? '' | translate }}</span>
+    </div>
+    }
+    <!-- Simple button -->
+    @else {
+    <div mat-menu-item [disabled]="isButtonDisabledFn() ? isButtonDisabledFn()!(btn) : false" (click)="onMenuButtonClick(btn, $event)" (keydown.enter)="onMenuButtonClick(btn, $event)">
+      @if (btn?.leftIcon) {
+      <mat-icon>{{ btn?.leftIcon }}</mat-icon>
+      }
+      {{ btn?.caption ?? '' | translate }}
+    </div>
+    }
+  </div>
+  }
+</mat-menu>

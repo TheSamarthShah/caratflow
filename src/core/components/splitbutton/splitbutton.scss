@@ -1,0 +1,226 @@
+@use "@angular/material" as mat;
+
+.split-button {
+  display: flex;
+  align-items: center;
+
+  .outlined-btn {
+    background-color: var(--theme-base);
+  }
+
+  .filled-btn {
+    @include mat.icon-overrides(
+      (
+        color: "",
+      )
+    );
+  }
+
+  .filled-btn,
+  .outlined-btn,
+  .text-btn {
+    mat-icon {
+      font-size: calc(var(--theme-medium-font-size) + 5px);
+      height: calc(var(--theme-medium-font-size) + 5px);
+      width: calc(var(--theme-medium-font-size) + 5px);
+    }
+  }
+
+  .menu-anchor {
+    display: inline-block;
+    height: -webkit-fill-available;
+    vertical-align: bottom;
+    position: relative;
+  }
+
+  // Common overrides for all buttons in this component
+  @include mat.button-overrides(
+    (
+      filled-container-shape: var(--theme-form-field-border-radius),
+      outlined-container-shape: var(--theme-form-field-border-radius),
+      text-container-shape: var(--theme-form-field-border-radius),
+      filled-label-text-size: var(--theme-medium-font-size),
+      outlined-label-text-size: var(--theme-medium-font-size),
+      text-label-text-size: var(--theme-medium-font-size),
+      outlined-outline-color: var(--theme-inverse),
+      outlined-label-text-color: var(--theme-inverse),
+      filled-container-color: var(--theme-inverse),
+      filled-horizontal-padding: var(--theme-spacing-large),
+      outlined-horizontal-padding: var(--theme-spacing-large),
+      filled-container-height: var(--theme-elements-container-height),
+      outlined-container-height: var(--theme-elements-container-height),
+      text-container-height: var(--theme-elements-container-height),
+    )
+  );
+
+  .split-button-dropdown-button {
+    min-width: var(--theme-height-width-xlarge);
+    --btn-color: var(--theme-primary);
+    --shadow-spread: 2px;
+    justify-content: center;
+    display: flex;
+    background-color: var(--theme-base);
+    border: 1px solid var(--btn-color);
+    border-left: none;
+    border-top-right-radius: var(--theme-form-field-border-radius);
+    border-bottom-right-radius: var(--theme-form-field-border-radius);
+
+    ::ng-deep button{
+    
+      box-shadow: none;
+       &:hover, 
+       &:focus-within { 
+         box-shadow:  none;
+       }
+    }
+     &:hover, 
+       &:focus-within {  
+        position: relative;
+         box-shadow:  0 0 0 var(--shadow-spread) rgb(from var(--btn-color) r g b / 0.5);
+       }
+
+    &.disabled {
+      border-color: var(--theme-border);
+      &:hover, 
+       &:focus-within { 
+         box-shadow:  none;
+       }
+    }
+  }
+
+  .split-button-wrap{
+    ::ng-deep .acty-button {
+      .main-button {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+    }
+  }
+}
+
+// Apply the theme overrides to the button inside the container
+.primary-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-primary),
+      outlined-label-text-color: var(--theme-primary),
+      filled-container-color: var(--theme-primary),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-primary),
+    )
+  );
+}
+
+.secondary-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-secondary),
+      outlined-label-text-color: var(--theme-secondary),
+      filled-container-color: var(--theme-secondary),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-secondary),
+    )
+  );
+}
+
+.success-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-success),
+      outlined-label-text-color: var(--theme-success),
+      filled-container-color: var(--theme-success),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-success),
+    )
+  );
+}
+
+.info-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-info),
+      outlined-label-text-color: var(--theme-info),
+      filled-container-color: var(--theme-info),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-info),
+    )
+  );
+}
+
+.warn-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-warn),
+      outlined-label-text-color: var(--theme-warn),
+      filled-container-color: var(--theme-warn),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-warn),
+    )
+  );
+}
+
+.help-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-help),
+      outlined-label-text-color: var(--theme-help),
+      filled-container-color: var(--theme-help),
+    )
+  );
+
+  @include mat.icon-overrides(
+    (
+      color: var(--theme-help),
+    )
+  );
+}
+
+.danger-btn button {
+  @include mat.button-overrides(
+    (
+      outlined-outline-color: var(--theme-danger),
+      outlined-label-text-color: var(--theme-danger),
+      filled-container-color: var(--theme-danger),
+    )
+  );
+
+  @include mat.icon-overrides((color: var(--theme-danger),
+    ));
+}
+
+.disabled-btn {
+  cursor: not-allowed;
+}
+
+.disabled-btn button {
+  @include mat.icon-overrides(
+    (
+      color: currentColor,
+    )
+  );
+}
+
+.split-button-main-button {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
