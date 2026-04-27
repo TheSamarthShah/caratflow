@@ -1,120 +1,97 @@
-@use "@angular/material" as mat;
+/* --- ERP Dense Container Layout --- */
+.erp-datetime-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 4px; /* Tight ERP standard spacing */
+  width: 100%;
 
-.datetime-field {
-  background-color: var(--theme-base);
-  border-radius: var(--theme-form-field-border-radius);
-
-  /* Disabled state styling */
+  /* 70/30 Layout Split */
+  .erp-date-field {
+    flex: 7;
+    min-width: 0;
+  }
+  .erp-time-field {
+    flex: 3;
+    min-width: 0;
+  }
+  
   &.disabled {
     opacity: 0.6;
-    /* visually faded */
     pointer-events: none;
-    /* prevent clicks */
   }
-  input {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  width: 100%;
 }
 
-.datetime-popup {
-  z-index: 1000;
-  /* above other elements */
-  background: var(--theme-surface-50);
-  /* use theme background */
-  box-shadow: 0px 3px 12px rgba(var(--theme-shadow-color));
-  width: var(--theme-datetime-popup-width);
+/* --- Deep Overrides for Dense Material Appearance --- */
+::ng-deep .erp-datetime-container {
+  
+  /* Shrink Height & Padding */
+  .mat-mdc-form-field-flex {
+    height: 36px;
+    padding: 0 8px;
+    align-items: center;
+    background-color: var(--theme-base, #ffffff);
+  }
 
-  /* Time selector row */
-  .time-selectors {
+  /* Center the input vertically */
+  .mat-mdc-form-field-infix {
+    padding: 0;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Shrink font size for grids */
+  input.mat-mdc-input-element {
+    font-size: 13px;
+    margin-top: 0;
+  }
+
+  /* Micro Suffix Icons */
+  .mat-mdc-icon-button {
+    padding: 4px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    .mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
   }
 
-  .spinner-label-group {
-    //removes default focus outline
-    outline: none; 
-  }
-
-    .spinner-label-group:focus {
-      outline: none;
-    }
-    //Apply style to inner div when outer is focused
-    .spinner-label-group:focus .spinner-inner {
-      border: 1px solid var(--theme-interactive-active-secondary);
-    }
-
-  /* Action buttons row */
-  .popup-actions {
-    display: flex;
-    justify-content: space-between;
-    padding: var(--theme-spacing-small);
-
-    button {
-      min-width: var(--theme-height-width-xlarge);
-      border-radius: 0px;
-      margin: 3%;
-      background-color: var(--theme-base);
+  /* Custom Tiny Clear Button */
+  .erp-clear-btn {
+    color: var(--theme-danger, #f44336);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    
+    &:hover {
+      opacity: 1;
     }
   }
 }
 
-.time-selectors {
-  span {
-    font-weight: bolder;
-  }
-}
-
-.spinner-value {
+/* --- Clean External Hints --- */
+.erp-hint-message {
   display: flex;
   align-items: center;
-  justify-content: center;
-}
+  gap: 4px;
+  font-size: 12px;
+  margin-top: 4px;
+  padding-left: 4px;
 
-.datetime-hint {
-  cursor: default;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: pre-line;
-  text-wrap-mode: nowrap;
-  mat-hint{
-    display: flex;
-  }
-  .hint-container {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    span {
-      flex-grow: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: left;
-    }
-  }
-
-  // Define your message types and their corresponding colors
-  $message-types: (
-    "error": var(--theme-danger),
-    "success": var(--theme-success),
-    "warning": var(--theme-warn),
-    "info": var(--theme-info),
-  );
-
-  // Loop over each type to generate the CSS
-  @each $type, $color in $message-types {
-    // This will create .acty-text-input-error, .acty-text-input-success, etc.
-    .acty-datetime-#{$type} {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: $color;
-      @include mat.icon-overrides(
-        (
-          color: currentColor,
-        )
-      );
-    }
+  .hint-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
   }
 }
+
+.hint-error { color: var(--theme-danger, #f44336); }
+.hint-warning { color: var(--theme-warn, #ff9800); }
+.hint-success { color: var(--theme-success, #4caf50); }
+.hint-info { color: var(--theme-info, #2196f3); }

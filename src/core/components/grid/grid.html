@@ -173,7 +173,6 @@
                       @if(columnobj?.editorType === '3'){
 
                       <acty-date-time
-                        [dateFormat]="column.dateFormat"
                         type="date"
                         [(ngModel)]="rule.value"
                       >
@@ -502,7 +501,6 @@
             [attr.data-col]="column.dataField"
             [attr.grid-id]="gridId()"
             [required]="false"
-            [dateFormat]="column.dateFormat"
             [hint]="getInvalidMessage(row, column.dataField)"
             (hintChange)="onInputInternalHintChange($event, row, column)"
             [(ngModel)]="row[column.dataField]"
@@ -842,7 +840,6 @@
 
                                 @if(columnobj?.editorType === '3'){
                                   <acty-date-time
-                                    [dateFormat]="descendant.dateFormat"
                                     type="date"
                                     [(ngModel)]="rule.value"
                                   >

@@ -443,7 +443,6 @@
                                 [required]="false"
                                 [isDisabled]="field.disableInputBox ?? false"
                                 [readOnly]="!(!isMaterialFilter() || !isCheckBoxAdded())"
-                                [isDatePickerVisible]="!isMaterialFilter() || !isCheckBoxAdded()"
                                 [formControlName]="field.dataField"
                                 [class.component-full-width]="isMaterialFilter()"
                                 [style]="!isMaterialFilter() ?
@@ -459,7 +458,6 @@
                                 [class.updatedCell]="
                                     isFieldUpdated(field.dataField)
                                   "
-                                [dateFormat]="field.dateFormat"
                                 (focusin)="openCustomDatePicker(field.dataField)"
                                 [hint]="getInvalidMessage(field.dataField)"
                                 (hintChange)="
@@ -510,10 +508,7 @@
                                   [required]="false"
                                   [isDisabled]="field.disableInputBox ?? false"
                                   [readOnly]="!(!isMaterialFilter() || !isCheckBoxAdded())"
-                                  [isDatePickerVisible]="!isMaterialFilter() || !isCheckBoxAdded()"
                                   [formControlName]="field.dataField+'_To'"
-                                  [dateFormat]="field.dateFormat"
-
                                   [class.component-full-width]="isMaterialFilter()"
                                   [style]="!isMaterialFilter() ?
                                     'width:' +

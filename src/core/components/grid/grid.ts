@@ -63,7 +63,7 @@ import { TabControl } from '../tabcontrol/tabcontrol';
 import { TextInput } from '../text-input/text-input';
 import { NumberInput } from '../number-input/number-input';
 import { Checkbox } from '../checkbox/checkbox';
-import { SharedModule } from 'src/app/shared/shared.module';
+
 import {
   LangChangeEvent,
   TranslateModule,
@@ -137,7 +137,7 @@ import { Languages } from 'src/core/models/languages.config';
     TextInput,
     NumberInput,
     Checkbox,
-    SharedModule,
+    DateTime,
     TranslateModule,
     MatProgressSpinnerModule,
     CellSummary,
@@ -5398,7 +5398,7 @@ export class Grid implements OnInit, OnChanges, AfterViewInit, OnDestroy {
         const hasClass =
           elementRef.nativeElement.classList.contains(columnClass);
         if (hasClass && component) {
-          component.openCalendar();
+          //component.openCalendar();
         }
       });
     });

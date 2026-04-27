@@ -25,7 +25,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { TextInput } from '../text-input/text-input';
 import { ReferenceScreenButton } from '../reference-screen-button/reference-screen-button';
 import { NumberInput } from '../number-input/number-input';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { DateTime } from '../datetime/datetime';
 import { DropDown } from '../dropdown/dropdown';
 import { Checkbox } from '../checkbox/checkbox';
 import { RadioButton } from '../radiobutton/radiobutton';
@@ -74,7 +74,7 @@ import { ActyNumberPipe } from 'src/core/pipe/acty-number-pipe';
     TextInput,
     ReferenceScreenButton,
     NumberInput,
-    SharedModule,
+    DateTime,
     DropDown,
     Checkbox,
     RadioButton,
