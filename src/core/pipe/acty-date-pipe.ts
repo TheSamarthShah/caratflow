@@ -3,20 +3,13 @@ import { DatepickerI18nService } from '../services/datepicker-i18n-service';
 import { DateTime as LuxonDateTime } from 'luxon';
 
 export class ActyDateUtils {
-  /**
-   * STRICTLY TIMEZONE-BLIND PARSER
-   * Extracts the exact visual numbers from any input and strictly locks them 
-   * so the browser cannot shift them on load or on blur.
-   */
   static parseToNeutral(value: Date | string | number | null | undefined): Date | null {
     if (value === null || value === undefined || value === '') return null;
-
     let luxonDate: LuxonDateTime;
 
     if (typeof value === 'string') {
       const normalized = value.replace(/\//g, '-').replace(' ', 'T');
       luxonDate = LuxonDateTime.fromISO(normalized, { zone: 'utc' });
-      
       if (!luxonDate.isValid) {
          luxonDate = LuxonDateTime.fromJSDate(new Date(value)).toUTC();
       }
@@ -29,8 +22,6 @@ export class ActyDateUtils {
     }
 
     if (!luxonDate || !luxonDate.isValid) return null;
-
-    // Lock the extracted numbers securely against the system timezone
     return luxonDate.setZone('system', { keepLocalTime: true }).toJSDate();
   }
 }
@@ -45,15 +36,15 @@ export class ActyDatePipe implements PipeTransform {
   transform(
     value: Date | string | number | null | undefined,
     currentLang: string,
-    dateFormat : string = 'YMD'
+    dateFormat: string = 'YMD'
   ): string {
     const neutralDate = ActyDateUtils.parseToNeutral(value);
     if (!neutralDate) return '';
-
     return this.formatNeutralDate(neutralDate, dateFormat);
   }
 
-  public formatNeutralDate(neutralDate: Date, dateFormat : string): string {
-    return this.datepickerI18n.formatDate(neutralDate, dateFormat);
+  public formatNeutralDate(neutralDate: Date, dateFormat: string): string {
+    // Calls the display method so Grids/Labels show 'Oct-25-2023'
+    return this.datepickerI18n.formatDateDisplay(neutralDate, dateFormat);
   }
 }

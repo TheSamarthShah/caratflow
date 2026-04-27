@@ -1,42 +1,21 @@
 <div class="erp-datetime-container" [class.disabled]="isDisabled()">
-  
-  @if (isYearVisible || isMonthVisible || isDayVisible) {
-    <mat-form-field appearance="outline" class="erp-date-field" subscriptSizing="dynamic">
-      <input matInput
-             [matDatepicker]="datePicker"
-             [readonly]="readOnly()"
-             [disabled]="isDisabled()"
-             [value]="currentDate"
-             (dateChange)="onDateSelected($event)"
-             (change)="onDateInputChanged($event)"
-             placeholder="YYYY/MM/DD">
-      
-      @if (currentDate && !required() && !readOnly() && !isDisabled()) {
-        <button mat-icon-button matSuffix (click)="clear(); $event.stopPropagation()" class="erp-clear-btn" matTooltip="Clear" tabindex="-1">
-          <mat-icon>close</mat-icon>
-        </button>
-      }
-      
-      <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
-      <mat-datepicker #datePicker></mat-datepicker>
-    </mat-form-field>
-  }
-
-  @if (isHourVisible || isMinuteVisible || isSecondVisible) {
-    <mat-form-field appearance="outline" class="erp-time-field" subscriptSizing="dynamic">
-      <input matInput
-             [matTimepicker]="timePicker"
-             [readonly]="readOnly()"
-             [disabled]="isDisabled()"
-             [value]="currentDate"
-             (timeChange)="onTimeSelected($event)"
-             (change)="onTimeInputChanged($event)"
-             placeholder="HH:mm">
-      <mat-timepicker-toggle matIconSuffix [for]="timePicker"></mat-timepicker-toggle>
-      <mat-timepicker #timePicker></mat-timepicker>
-    </mat-form-field>
-  }
-
+  <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+    <input matInput
+           #inputRef
+           [readonly]="readOnly()"
+           [disabled]="isDisabled()"
+           [value]="formatDisplay(currentDate)"
+           (focus)="inputRef.value = ''" 
+           (change)="onCombinedInputChanged($event)"
+           (input)="onTypingFormat($event)"
+           [placeholder]="getCombinedPlaceholder()">
+    
+    @if (currentDate && !required() && !readOnly() && !isDisabled()) {
+      <button mat-icon-button matSuffix (click)="clear(); $event.stopPropagation()" class="erp-clear-btn" matTooltip="Clear" tabindex="-1">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
 </div>
 
 @if (hint()?.message) {
